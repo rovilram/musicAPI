@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,28 +8,37 @@
     <title>musicAPI</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
-    
+    <header class="header">
+        <div class="headerWrapper">
+            <h1>MusicAPIs</h1>
+        </div>
+    </header>
+
 
     <div class="wrapper">
-        <div class="search">
-            <div class="inputWrapper">
-                <input type="text" id="searchInput">
-            </div>
-            <div class="btbWrapper">
-                <div class="searchBtn">
-                    Buscar
+        <section class="searchSection">
+            <div class="search">
+                <div class="inputWrapper">
+                    <input type="text" id="searchInput">
+                </div>
+                <div class="btbWrapper">
+                    <div class="searchBtn">
+                        <h2>Busca por Banda</h2>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
+        <section class="resultsSection">
+            <div class="results">
+
+            </div>
+        </section>
     </div>
 
-    <div class="resultsWrapper">
-        <div class="results">
-
-        </div>
-    </div>
     <script src="js/functions.js"></script>
     <script src="js/main.js"></script>
 </body>
+
 </html>

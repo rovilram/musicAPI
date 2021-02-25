@@ -11,16 +11,19 @@ const searchAPI = (searchText, resultsDiv) => {
             const dataArtists = data.artists;
 
             dataArtists.forEach(artist => {
-                console.log(artist);
+                const artistWrapper = createNode("div", {
+                    className:"artistWrapper"
+                })
                 createNode("div", {
                     id: artist.id,
                     className: "artistName",
                     innerText: artist.name
-                }, resultsDiv);
+                }, artistWrapper);
                 createNode("div", {
                     className: "artistDis",
                     innerText: `${(artist.disambiguation) ? artist.disambiguation : "-"}`
-                }, resultsDiv)
+                }, artistWrapper)
+                resultsDiv.appendChild(artistWrapper);
             });
 
 
@@ -29,20 +32,43 @@ const searchAPI = (searchText, resultsDiv) => {
 
 }
 
-const showDetail = (id,resultsDiv) => {
-    fetch(`http://musicbrainz.org/ws/2/artist/${id}?inc=release-groups&fmt=json`)
+const showDetail = (id, resultsDiv) => {
+
+    fetch(`http://musicbrainz.org/ws/2/artist/${id}?inc=releases&fmt=json`)
         .then(response => response.json())
         .then(data => {
             console.log(data);
-            const discography=data["release-groups"];
-            resultsDiv.innerHTML="";
+            const discography = data.releases;
             discography.forEach(disco => {
-                resultsDiv.innerHTML+=disco.title;
+                const discWrapper = createNode("div", {
+                    className: "discWrapper",
+                })
+                createNode("div", {
+                    id: discography.id,
+                    className: "artistName",
+                    innerText: disco.title
+                }, discWrapper);
+                console.log(`http://coverartarchive.org/release/${disco.id}`);
+                fetch(`http://coverartarchive.org/release/${disco.id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        createNode("img", {
+                            id: data.id,
+                            className: "releaseImg",
+                            src: data.images[0].image
+                        }, discWrapper);
+                    })
+                    .catch (data => {
+                        console.log("CATCH");
+                        createNode("img", {
+                            className: "releaseImg",
+                            src: "https://via.placeholder.com/150x150.png?text=NO+COVER"
+                        }, discWrapper);
+                    })
+                resultsDiv.appendChild(discWrapper)
             })
         })
 }
-
-
 
 
 
