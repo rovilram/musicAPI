@@ -1,16 +1,21 @@
 "use strict";
 //------------------------------------FUNCTIONS------------------------------------
-const apiToken = "qIHUSqYVTbUwldVvzrbgbUObJAwpPOvOtpTSxzZk";
+const API_TOKEN = "qIHUSqYVTbUwldVvzrbgbUObJAwpPOvOtpTSxzZk";
+let backHistory="";
 
 
 const showMaster = (searchText, resultsDiv, d) => {
 
-    console.log("fuera del fetch")
-    fetch(`https://api.discogs.com/database/search?q=${searchText}&token=${apiToken}&type=artist`)
+    fetch(`https://api.discogs.com/database/search?q=${searchText}&token=${API_TOKEN}&type=artist`)
         .then(response => response.json())
         .then(data => {//Aquí es donde tengo que desarrollar el código que se ejecuta cuando llega el asíncrono
 
             const dataArtists = data.results;
+
+            const newResultDiv = createNode("div", {
+                className:"results"
+            })
+
             dataArtists.forEach(artist => {
                 const artistPic = (artist.thumb) ? artist.thumb : "https://via.placeholder.com/150x150.png?text=NO+PHOTO"
                 const artistWrapper = createNode("div", {
@@ -24,14 +29,15 @@ const showMaster = (searchText, resultsDiv, d) => {
                 createNode("img", {
                     className: "artistDis",
                     src: artistPic
-                }, artistWrapper)
+                }, artistWrapper);
 
-                resultsDiv.appendChild(artistWrapper);
+                newResultDiv.appendChild(artistWrapper);
 
+                resultsDiv.replaceWith(newResultDiv);
 
                 //Definimos aquí el evento que lleva al artista.
-                d.querySelector(`#divArtist${artist.id}`).addEventListener("click",() => {
-                    showDetail(artist.id, apiToken, resultsDiv);
+                d.querySelector(`#divArtist${artist.id}`).addEventListener("click", () => {
+                    showDetail(artist.id, API_TOKEN, newResultDiv);
                 })
             });
 
@@ -41,31 +47,37 @@ const showMaster = (searchText, resultsDiv, d) => {
 
 }
 
-const showDetail = (id, apiToken, resultsDiv) => {
+const showDetail = (id, apiToken, resultsDiv, d) => {
+
 
     fetch(`https://api.discogs.com/artists/${id}?token=${apiToken}`)
         .then(response => response.json())
         .then(artist => {
             const artistObject = {
                 artistName: artist.name,
-                artistPic: (artist.images[0].uri) ?
+                artistPic: (artist.images) ?
                     artist.images[0].uri :
                     "https://via.placeholder.com/150x150.png?text=NO+PHOTO",
                 artistProfile: artist.profile,
                 membersArray: artist.members,
             }
 
+            const newResultDiv = createNode("div", {
+                className: "results",
+            });
+
+    
             createNode("h2", {
                 className: "artistData",
                 innerText: artistObject.artistName,
-            }, resultsDiv);
+            }, newResultDiv);
 
             createNode("img", {
                 className: "ArtistData Pic",
                 src: (artistObject.artistPic)
                     ? artistObject.artistPic
                     : "https://via.placeholder.com/150x150.png?text=NO+PHOTO"
-            }, resultsDiv);
+            }, newResultDiv);
             //BIOGRAFÍA
             const bioWrapper = createNode("div", {
                 className: "bioWrapper"
@@ -78,7 +90,7 @@ const showDetail = (id, apiToken, resultsDiv) => {
                 className: "artistData profile",
                 innerText: artistObject.artistProfile
             }, bioWrapper);
-            resultsDiv.appendChild(bioWrapper);
+            newResultDiv.appendChild(bioWrapper);
 
             //FORMACIÓN
             if (artistObject.membersArray) {
@@ -98,9 +110,10 @@ const showDetail = (id, apiToken, resultsDiv) => {
                         }, membersDiv)
                     }
                 );
-                resultsDiv.appendChild(membersDiv);
+                newResultDiv.appendChild(membersDiv);
             }
-            showDiscography(id, apiToken, resultsDiv);
+            resultsDiv.replaceWith(newResultDiv);
+            showDiscography(id, apiToken, newResultDiv);
         })
 }
 
