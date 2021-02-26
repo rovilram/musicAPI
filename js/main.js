@@ -4,7 +4,7 @@ const API_TOKEN = "qIHUSqYVTbUwldVvzrbgbUObJAwpPOvOtpTSxzZk";
 let backHistory="";
 
 
-const showMaster = (searchText, resultsDiv, d) => {
+const showMaster = (searchText, resultsDiv, d, backHistory) => {
 
     fetch(`https://api.discogs.com/database/search?q=${searchText}&token=${API_TOKEN}&type=artist`)
         .then(response => response.json())
@@ -34,10 +34,11 @@ const showMaster = (searchText, resultsDiv, d) => {
                 newResultDiv.appendChild(artistWrapper);
 
                 resultsDiv.replaceWith(newResultDiv);
+                backHistory = resultsDiv;
 
                 //Definimos aquí el evento que lleva al artista.
                 d.querySelector(`#divArtist${artist.id}`).addEventListener("click", () => {
-                    showDetail(artist.id, API_TOKEN, newResultDiv);
+                    showDetail(artist.id, API_TOKEN, newResultDiv, backHistory);
                 })
             });
 
@@ -47,7 +48,7 @@ const showMaster = (searchText, resultsDiv, d) => {
 
 }
 
-const showDetail = (id, apiToken, resultsDiv, d) => {
+const showDetail = (id, apiToken, resultsDiv, backHistory) => {
 
 
     fetch(`https://api.discogs.com/artists/${id}?token=${apiToken}`)
@@ -62,10 +63,16 @@ const showDetail = (id, apiToken, resultsDiv, d) => {
                 membersArray: artist.members,
             }
 
+            
+            
             const newResultDiv = createNode("div", {
                 className: "results",
             });
-
+            
+            const detailBtn = createNode("Div", {
+                className: "detailBtn",
+                innerText: "Regresar"
+            }, newResultDiv );
     
             createNode("h2", {
                 className: "artistData",
@@ -74,9 +81,7 @@ const showDetail = (id, apiToken, resultsDiv, d) => {
 
             createNode("img", {
                 className: "ArtistData Pic",
-                src: (artistObject.artistPic)
-                    ? artistObject.artistPic
-                    : "https://via.placeholder.com/150x150.png?text=NO+PHOTO"
+                src: artistObject.artistPic
             }, newResultDiv);
             //BIOGRAFÍA
             const bioWrapper = createNode("div", {
@@ -100,7 +105,7 @@ const showDetail = (id, apiToken, resultsDiv, d) => {
                 });
                 createNode("h3", {
                     className: "membersTitle",
-                    innerText: "Miembros"
+                    innerText: "Formación"
                 }, membersDiv);
                 artistObject.membersArray.forEach(
                     member => {
@@ -114,6 +119,16 @@ const showDetail = (id, apiToken, resultsDiv, d) => {
             }
             resultsDiv.replaceWith(newResultDiv);
             showDiscography(id, apiToken, newResultDiv);
+
+
+
+            //EVENTO BOTÓN REGRESAR
+            console.log(detailBtn);
+            detailBtn.addEventListener ("click", () => {
+                newResultDiv.replaceWith(resultsDiv);
+            })
+
+
         })
 }
 
@@ -171,7 +186,6 @@ const d = document;
 document.addEventListener("click", (e) => {
 
     const resultsDiv = document.querySelector(".results");
-    console.log("CLICK")
     if (e.target.classList.contains("search")) {
         const searchText = document.querySelector(".searchInput").value;
         d.querySelector(".searchSection").classList.add("masterVersion");

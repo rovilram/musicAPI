@@ -75,7 +75,7 @@ const getQuestions = (questions, num) => {
 //si queremos lo mete dentro del elemento que le pasemos en container
 //El parametro htmlAttributes es un objeto que tiene como propiedades
 //los atributos css (con el nombre que usaríamos en JS) que queramos cambiar
-//devuelve true si hay parametro container y el nodo si no lo hay.
+//devuelve el nodo creado por si lo queremos usar
 const createNode = (htmlElement, htmlAttributes, container) => {
     
     const HTMLnode = document.createElement(htmlElement);
@@ -85,10 +85,8 @@ const createNode = (htmlElement, htmlAttributes, container) => {
     })
     if (container) {
         container.appendChild(HTMLnode);
-        return true;
-    } else {
-        return HTMLnode;
     }
+        return HTMLnode;
 }
 
 //------------------------------------------------------------------
