@@ -36,8 +36,9 @@ const showMaster = (searchText, resultsDiv, d, backHistory) => {
                 resultsDiv.replaceWith(newResultDiv);
                 backHistory = resultsDiv;
 
-                //Definimos aquí el evento que lleva al artista.
-                d.querySelector(`#divArtist${artist.id}`).addEventListener("click", () => {
+                //Definimos aquí el evento que lleva al artista.    
+                console.log("HOLA",d.querySelector(".artistWrapper"))
+                d.querySelector(".artistWrapper").addEventListener("click", () => {
                     showDetail(artist.id, API_TOKEN, newResultDiv, backHistory);
                 })
             });
