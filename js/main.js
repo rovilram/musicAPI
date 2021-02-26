@@ -193,3 +193,7 @@ document.addEventListener("click", (e) => {
     }
 
 })
+
+d.querySelector(".searchInput").addEventListener("keyup", (e) => {
+    if (e.key==="Enter") d.querySelector(".searchBtn").click();
+})
