@@ -3,7 +3,7 @@
 const apiToken = "qIHUSqYVTbUwldVvzrbgbUObJAwpPOvOtpTSxzZk";
 
 
-const searchAPI = (searchText, resultsDiv) => {
+const showMaster = (searchText, resultsDiv, d) => {
 
     console.log("fuera del fetch")
     fetch(`https://api.discogs.com/database/search?q=${searchText}&token=${apiToken}&type=artist`)
@@ -17,7 +17,7 @@ const searchAPI = (searchText, resultsDiv) => {
                     className: "artistWrapper"
                 })
                 createNode("div", {
-                    id: artist.id,
+                    id: `divArtist${artist.id}`,
                     className: "artistName",
                     innerText: artist.title
                 }, artistWrapper);
@@ -25,7 +25,14 @@ const searchAPI = (searchText, resultsDiv) => {
                     className: "artistDis",
                     src: artistPic
                 }, artistWrapper)
+
                 resultsDiv.appendChild(artistWrapper);
+
+
+                //Definimos aquí el evento que lleva al artista.
+                d.querySelector(`#divArtist${artist.id}`).addEventListener("click",() => {
+                    showDetail(artist.id, apiToken, resultsDiv);
+                })
             });
 
 
@@ -41,8 +48,8 @@ const showDetail = (id, apiToken, resultsDiv) => {
         .then(artist => {
             const artistObject = {
                 artistName: artist.name,
-                artistPic: (artist.images[0].uri)?
-                    artist.images[0].uri:
+                artistPic: (artist.images[0].uri) ?
+                    artist.images[0].uri :
                     "https://via.placeholder.com/150x150.png?text=NO+PHOTO",
                 artistProfile: artist.profile,
                 membersArray: artist.members,
@@ -154,11 +161,8 @@ document.addEventListener("click", (e) => {
     console.log("CLICK")
     if (e.target.classList.contains("search")) {
         const searchText = document.querySelector(".searchInput").value;
-        searchAPI(searchText, resultsDiv);
+        d.querySelector(".searchSection").classList.add("masterVersion");
+        showMaster(searchText, resultsDiv, d)
+    }
 
-    }
-    else if (e.target.className.includes("artistName")) {
-        console.log(`CLICK EN ${e.target.innerText} con ID ${e.target.id}`)
-        showDetail(e.target.id, apiToken, resultsDiv);
-    }
 })

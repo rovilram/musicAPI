@@ -20,7 +20,13 @@ body {
     height: 80vh;
     display: flex;
     align-items: center;
+    transition: height 1s;
 }
+
+.masterVersion {
+    height: 10vh;
+}
+
 .releaseImg {
     width:200px;
 }
@@ -73,7 +79,17 @@ body {
 
 .artistWrapper {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    align-items: center;
+    width: 80%;
+    margin: 5vh 10%;
+    border:1px solid black;
+
+}
+
+
+.artistName {
+    margin:1%;
 }
 
 .discWrapper {
