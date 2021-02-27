@@ -1,5 +1,6 @@
 body {
   margin: 0;
+  font-family: "Acme", sans-serif;
 }
 
 .header {
@@ -61,7 +62,8 @@ h2 {
   flex-grow: 1;
 }
 
-.btnWrapper, .btnWrapper2 {
+.btnWrapper,
+.btnWrapper2 {
   flex-grow: 0;
 }
 
@@ -94,12 +96,15 @@ h2 {
   align-items: center;
   background-color: lightgray;
   border-radius: 10px;
+  background-color: #ff0009;
+  color: white;
 }
 
 .searchBtn:hover,
 .searchBtn2:hover,
 .detailBtn:hover {
-    color:red;
+  background-color: #ffd700;
+  color: black;
 }
 
 .results {
