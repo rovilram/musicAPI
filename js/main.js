@@ -1,33 +1,42 @@
 "use strict";
 //------------------------------------FUNCTIONS------------------------------------
-const API_TOKEN = "qIHUSqYVTbUwldVvzrbgbUObJAwpPOvOtpTSxzZk";
-let backHistory="";
+const API_TOKEN = "fNluMyNocCgjQNKAiyOmdWcUTVVfhHEfOTFNBIrT";
+let backHistory = "";
 
 
 const showMaster = (searchText, resultsDiv, d, backHistory) => {
 
-    fetch(`https://api.discogs.com/database/search?q=${searchText}&token=${API_TOKEN}&type=artist`)
+    //   musicAPIs v0.1 +https://rovilram.github.io/musicAPI/
+    const headers = new Headers();
+
+    // add headers
+    headers.append('User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/');
+
+    const request = new Request(`https://api.discogs.com/database/search?q=${searchText}&token=${API_TOKEN}&type=artist&per_page=10`, {
+        headers: headers
+    });
+
+    fetch(request)
         .then(response => response.json())
         .then(data => {//Aquí es donde tengo que desarrollar el código que se ejecuta cuando llega el asíncrono
-
             const dataArtists = data.results;
 
             const newResultDiv = createNode("div", {
-                className:"results"
+                className: "results"
             })
 
             dataArtists.forEach(artist => {
                 const artistPic = (artist.thumb) ? artist.thumb : "https://via.placeholder.com/150x150.png?text=NO+PHOTO"
                 const artistWrapper = createNode("div", {
+                    id: `divArtist${artist.id}`,
                     className: "artistWrapper"
                 })
                 createNode("div", {
-                    id: `divArtist${artist.id}`,
                     className: "artistName",
                     innerText: artist.title
                 }, artistWrapper);
                 createNode("img", {
-                    className: "artistDis",
+                    className: "artistPic",
                     src: artistPic
                 }, artistWrapper);
 
@@ -37,9 +46,8 @@ const showMaster = (searchText, resultsDiv, d, backHistory) => {
                 backHistory = resultsDiv;
 
                 //Definimos aquí el evento que lleva al artista.    
-                console.log("HOLA",d.querySelector(".artistWrapper"))
-                d.querySelector(".artistWrapper").addEventListener("click", () => {
-                    showDetail(artist.id, API_TOKEN, newResultDiv, backHistory);
+                d.querySelector(`#divArtist${artist.id}`).addEventListener("click", function () {
+                    showDetail(artist.id, API_TOKEN, newResultDiv);
                 })
             });
 
@@ -49,10 +57,19 @@ const showMaster = (searchText, resultsDiv, d, backHistory) => {
 
 }
 
-const showDetail = (id, apiToken, resultsDiv, backHistory) => {
+const showDetail = (id, apiToken, resultsDiv) => {
+
+    const headers = new Headers();
+
+    // add headers
+    headers.append('User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/');
+
+    const request = new Request(`https://api.discogs.com/artists/${id}?token=${apiToken}`, {
+        headers: headers
+    });
 
 
-    fetch(`https://api.discogs.com/artists/${id}?token=${apiToken}`)
+    const response = fetch(request)
         .then(response => response.json())
         .then(artist => {
             const artistObject = {
@@ -64,17 +81,17 @@ const showDetail = (id, apiToken, resultsDiv, backHistory) => {
                 membersArray: artist.members,
             }
 
-            
-            
+
+
             const newResultDiv = createNode("div", {
                 className: "results",
             });
-            
+
             const detailBtn = createNode("Div", {
                 className: "detailBtn",
                 innerText: "Regresar"
-            }, newResultDiv );
-    
+            }, newResultDiv);
+
             createNode("h2", {
                 className: "artistData",
                 innerText: artistObject.artistName,
@@ -124,8 +141,7 @@ const showDetail = (id, apiToken, resultsDiv, backHistory) => {
 
 
             //EVENTO BOTÓN REGRESAR
-            console.log(detailBtn);
-            detailBtn.addEventListener ("click", () => {
+            detailBtn.addEventListener("click", () => {
                 newResultDiv.replaceWith(resultsDiv);
             })
 
@@ -196,5 +212,5 @@ document.addEventListener("click", (e) => {
 })
 
 d.querySelector(".searchInput").addEventListener("keyup", (e) => {
-    if (e.key==="Enter") d.querySelector(".searchBtn").click();
+    if (e.key === "Enter") d.querySelector(".searchBtn").click();
 })
