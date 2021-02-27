@@ -200,16 +200,24 @@ const showDiscography = (id, apiToken, resultsDiv) => {
 const d = document;
 
 //------------------------------------EVENTS------------------------------------
-document.addEventListener("click", (e) => {
-
-    const resultsDiv = document.querySelector(".results");
-    if (e.target.classList.contains("search")) {
-        const searchText = document.querySelector(".searchInput").value;
-        d.querySelector(".searchSection").classList.add("masterVersion");
-        showMaster(searchText, resultsDiv, d)
-    }
+d.querySelector(".searchBtn").addEventListener("click", () => {
+    const resultsDiv = d.querySelector(".results");
+    const searchText = d.querySelector(".searchInput").value;
+    d.querySelector(".searchSection").classList.add("masterVersion");
+    showMaster(searchText, resultsDiv, d)
 
 })
+d.querySelector(".searchBtn2").addEventListener("click", () => {
+    const resultsDiv = d.querySelector(".results");
+    const newResultsDiv = createNode("div", {
+        className: "results",
+    })
+    resultsDiv.replaceWith(newResultsDiv);
+    d.querySelector(".searchSection").classList.remove("masterVersion");
+    d.querySelector(".searchInput").value="";
+
+})
+
 
 d.querySelector(".searchInput").addEventListener("keyup", (e) => {
     if (e.key === "Enter") d.querySelector(".searchBtn").click();
