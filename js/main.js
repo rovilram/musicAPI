@@ -1,18 +1,23 @@
 "use strict";
 //------------------------------------FUNCTIONS------------------------------------
-const API_TOKEN = "fNluMyNocCgjQNKAiyOmdWcUTVVfhHEfOTFNBIrT";
-let backHistory = "";
+const API_DATA = {
+    token: "fNluMyNocCgjQNKAiyOmdWcUTVVfhHEfOTFNBIrT",
+    url: "https://api.discogs.com/"
+}
+
+// const API_TOKEN = "fNluMyNocCgjQNKAiyOmdWcUTVVfhHEfOTFNBIrT";
+// const API = "https://api.discogs.com/"
+ let backHistory = "";
 
 
-const showMaster = (searchText, resultsDiv, d, backHistory) => {
+const showMaster = (searchText, resultsDiv, d, API_DATA, backHistory) => {
 
-    //   musicAPIs v0.1 +https://rovilram.github.io/musicAPI/
     const headers = new Headers();
 
     // add headers
     headers.append('User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/');
 
-    const request = new Request(`https://api.discogs.com/database/search?q=${searchText}&token=${API_TOKEN}&type=artist&per_page=10`, {
+    const request = new Request(`${API_DATA.url}/database/search?q=${searchText}&token=${API_DATA.token}&type=artist&per_page=10`, {
         headers: headers
     });
 
@@ -47,7 +52,7 @@ const showMaster = (searchText, resultsDiv, d, backHistory) => {
 
                 //Definimos aquí el evento que lleva al artista.    
                 d.querySelector(`#divArtist${artist.id}`).addEventListener("click", function () {
-                    showDetail(artist.id, API_TOKEN, newResultDiv);
+                    showDetail(artist.id, API_DATA, newResultDiv);
                 })
             });
 
@@ -57,14 +62,14 @@ const showMaster = (searchText, resultsDiv, d, backHistory) => {
 
 }
 
-const showDetail = (id, apiToken, resultsDiv) => {
+const showDetail = (id, API_DATA, resultsDiv) => {
 
     const headers = new Headers();
 
     // add headers
     headers.append('User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/');
 
-    const request = new Request(`https://api.discogs.com/artists/${id}?token=${apiToken}`, {
+    const request = new Request(`https://api.discogs.com/artists/${id}?token=${API_DATA.token}`, {
         headers: headers
     });
 
@@ -136,7 +141,7 @@ const showDetail = (id, apiToken, resultsDiv) => {
                 newResultDiv.appendChild(membersDiv);
             }
             resultsDiv.replaceWith(newResultDiv);
-            showDiscography(id, apiToken, newResultDiv);
+            showDiscography(id, API_DATA, newResultDiv);
 
 
 
@@ -149,10 +154,10 @@ const showDetail = (id, apiToken, resultsDiv) => {
         })
 }
 
-const showDiscography = (id, apiToken, resultsDiv) => {
+const showDiscography = (id, API_DATA, resultsDiv) => {
 
     //obtenemos la discografía
-    fetch(`https://api.discogs.com/artists/${id}/releases?token=${apiToken}&sort=year`)
+    fetch(`https://api.discogs.com/artists/${id}/releases?token=${API_DATA.token}&sort=year`)
         .then(response => response.json())
         .then(releases => {
 
@@ -204,7 +209,7 @@ d.querySelector(".searchBtn").addEventListener("click", () => {
     const resultsDiv = d.querySelector(".results");
     const searchText = d.querySelector(".searchInput").value;
     d.querySelector(".searchSection").classList.add("masterVersion");
-    showMaster(searchText, resultsDiv, d)
+    showMaster(searchText, resultsDiv, d, API_DATA, backHistory)
 
 })
 d.querySelector(".searchBtn2").addEventListener("click", () => {
