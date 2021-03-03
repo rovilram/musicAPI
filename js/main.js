@@ -324,7 +324,6 @@ const fetchDisco = (id, API_DATA, resultsDiv) => {
     // add headers
     headers.append('User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/');
     const request = new Request(`${API_DATA.url}/artists/${id}/releases?token=${API_DATA.token}&sort=year`, {
-        mode: 'no-cors',
         headers: headers
     });
     const response = fetch(request)
