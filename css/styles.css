@@ -1,10 +1,12 @@
 body {
   margin: 0;
+  padding: 0;
   font-family: "Acme", sans-serif;
+  height: 100vh;
 }
 
 .header {
-  height: 10vh;
+  height: 15vh;
   display: flex;
   justify-content: center;
 }
@@ -35,14 +37,14 @@ h2 {
 }
 .searchSection {
   width: 100%;
-  height: 80vh;
+  height: 70vh;
   display: flex;
   align-items: center;
   transition: height 1s;
 }
 
 .masterVersion {
-  height: 10vh;
+  height: 40vh;
 }
 
 .releaseImg {
@@ -51,7 +53,9 @@ h2 {
 
 .searchWrapper {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   height: 10vh;
   width: 100%;
 }
@@ -61,9 +65,12 @@ h2 {
   height: 8vh;
   flex-grow: 1;
 }
+.btnWrapper {
+  display: flex;
+}
 
-.btnWrapper,
-.btnWrapper2 {
+.searchBtnWrapper,
+.cleanBtnWrapper {
   flex-grow: 0;
 }
 
@@ -74,7 +81,7 @@ h2 {
 }
 
 .inputWrapper {
-  flex-grow: 2;
+  width:100%;
 }
 .searchInput {
   width: 100%;
@@ -87,10 +94,11 @@ h2 {
 }
 
 .searchBtn,
-.searchBtn2,
+.cleanBtn,
+.cacheBtn,
 .detailBtn {
   padding: 10px;
-  margin: 0;
+  margin: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -98,6 +106,15 @@ h2 {
   border-radius: 10px;
   background-color: #ff0009;
   color: white;
+}
+footer {
+  display:flex;
+  justify-content: center;
+  margin:10px;
+  height: 10vh;
+}
+.cacheBtn {
+  width: 100px;
 }
 
 .searchBtn:hover,

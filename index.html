@@ -30,13 +30,15 @@
                     <input type="text" class="searchInput">
                 </div>
                 <div class="btnWrapper">
-                    <div class="searchBtn search">
-                        <span class="search">Busca por Banda</span>
+                    <div class="searchBtnWrapper">
+                        <div class="searchBtn search">
+                            <span class="search">Busca por Banda</span>
+                        </div>
                     </div>
-                </div>
-                <div class="btnWrapper2">
-                    <div class="searchBtn2 search">
-                        <span class="search">Limpiar</span>
+                    <div class="cleanBtnWrapper2">
+                        <div class="cleanBtn search">
+                            <span class="search">Limpiar</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -48,8 +50,21 @@
         </section>
     </div>
 
+    <footer>
+        <div class="btnWrapper">
+            <div class="cacheBtn cache">
+                <span class="cache">Borrar Caché</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/8.2.9/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.9/firebase-database.js"></script>
+
     <script src="js/functions.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/firebase.js"></script>
+
 </body>
 
 </html>
