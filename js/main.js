@@ -6,17 +6,14 @@ const API_DATA = {
     header: ['User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/']
 }
 
-// const API_TOKEN = "fNluMyNocCgjQNKAiyOmdWcUTVVfhHEfOTFNBIrT";
-// const API = "https://api.discogs.com/"
 let backHistory = {};
-/* 
 
 const getCache = (searchText) => {
     if (localStorage) {
         const cache = JSON.parse(localStorage.getItem(searchText));
         if (cache != null) {
             //hay datos y los devuelvo
-            console.log("CACHE", searchText, cache);
+            console.log("CACHE", searchText);
             return cache;
         }
         else {
@@ -35,9 +32,7 @@ const setCache = (searchText, data) => {
     }
 };
 
-const clearCache = () => localStorage.clear();
 
- */
 
 
 
@@ -53,28 +48,30 @@ const clearCache = () => localStorage.clear();
 const showMaster = (searchText, resultsDiv, API_DATA, backHistory) => {
 
     //    const cache = 
-    getCache(searchText)
-        .then(
-            cache => {
-                console.log("Recogiendo datos de FIREBASE", searchText)
-                paintArtists(cache.data, resultsDiv, API_DATA); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
-            }
-        )
-        .catch(
-            error => {
-                console.log(error, searchText);
-                fetchArtists(searchText, resultsDiv, API_DATA);
-            }
-        )
+    const cache = getCache(searchText);
 
 
-    /*     console.log("CACHEEEEER", cache)
-        if (cache !== false) {
-            paintArtists(cache, resultsDiv, API_DATA); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
-        }
-        else {
-            fetchArtists(searchText, resultsDiv, API_DATA);
-        } */
+    if (cache !== false) {
+        paintArtists(cache, resultsDiv, API_DATA); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
+    }
+    else {
+        fetchArtists(searchText, resultsDiv, API_DATA);
+    }
+
+
+    /*         .then(
+                cache => {
+                    console.log("Recogiendo datos de FIREBASE", searchText)
+                    paintArtists(cache.data, resultsDiv, API_DATA); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
+                }
+            )
+            .catch(
+                error => {
+                    console.log(error, searchText);
+                    fetchArtists(searchText, resultsDiv, API_DATA);
+                }
+            ) */
+
 
 
 }
@@ -89,10 +86,10 @@ const fetchArtists = (searchText, resultsDiv, API_DATA) => {
     });
 
     fetch(request)
-        .then(response => 
-            {console.log("HEADER",response.headers);
-                return response.json()
-            })
+        .then(response => {
+            console.log("HEADER", response.headers);
+            return response.json()
+        })
         .then(data => {
             const dataArtists = data.results;
             setCache(searchText, dataArtists);
@@ -148,15 +145,22 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA) => {
 const showDetail = (id, API_DATA, resultsDiv, backHistory) => {
 
 
-    getCache(`artist${id}`)
-        .then(cache => {
-            console.log("Recogiendo datos de FIREBASE", `artist${id}`)
-            paintArtist(cache, resultsDiv, API_DATA);; //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
-        })
-        .catch(error => {
-            console.log(error, `artist${id}`);
-            fetchArtist(id, API_DATA, resultsDiv);
-        })
+    const cache = getCache(`artist${id}`);
+    /*         .then(cache => {
+                console.log("Recogiendo datos de FIREBASE", `artist${id}`)
+                paintArtist(cache, resultsDiv, API_DATA);; //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
+            })
+            .catch(error => {
+                console.log(error, `artist${id}`);
+                fetchArtist(id, API_DATA, resultsDiv);
+            }) */
+
+    if (cache !== false) {
+        paintArtist(cache, resultsDiv, API_DATA); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
+    }
+    else {
+        fetchArtist(id, API_DATA, resultsDiv);
+    }
 
 
 }
@@ -171,11 +175,9 @@ const fetchArtist = (id, API_DATA, resultsDiv) => {
     });
     fetch(request)
         .then(response => {
-            console.log(response.headers);
             return response.json()
         })
         .then(artist => {
-            console.log("AQUIUUUUUII", artist)
             setCache(`artist${id}`, artist);
             paintArtist(artist, resultsDiv, API_DATA);
         })
@@ -186,10 +188,19 @@ const paintArtist = (artist, resultsDiv, API_DATA) => {
         className: "results",
     });
 
-    const detailBtn = createNode("Div", {
-        className: "detailBtn",
+    const detailBtnWrapper = createNode("Div", {
+        className: "detailBtnWrapper",
+    }, newResultDiv)
+
+    const backBtn = createNode("Div", {
+        className: "backBtn",
         innerText: "Regresar"
-    }, newResultDiv);
+    }, detailBtnWrapper);
+
+    const favBtn = createNode("Div", {
+        className: "favBtn",
+        innerText: "Favorito"
+    }, detailBtnWrapper);
 
     createNode("h2", {
         className: "artistData",
@@ -240,12 +251,27 @@ const paintArtist = (artist, resultsDiv, API_DATA) => {
 
 
     //EVENTO BOTÓN REGRESAR
-    detailBtn.addEventListener("click", () => {
+    backBtn.addEventListener("click", () => {
         newResultDiv.replaceWith(resultsDiv);
 
         //Aqui vamos a hacer la implementación de la caché
         //        newCachedSearch(API_DATA, resultsDiv, backHistory);
 
+    })
+
+    //EVENTO BOTÓN FAVORITO
+    favBtn.addEventListener("click", () => {
+        getFav(`artist${artist.id}`)
+            .then(data => {
+                console.log("YA ESTA GUARDADO COMO FAVORITO", `artist${artist.id}`, data);
+                cleanFav(`artist${artist.id}`);
+                console.log("BORRANDO", `artist${artist.id}`);
+            })
+            .catch(err => {
+                console.log("NO ESTÁ GUARDADO", `artist${artist.id}`, err);
+                setFav(`artist${artist.id}`);
+                console.log("GUARDANDO", `artist${artist.id}`);
+        })
     })
 
 
@@ -307,8 +333,18 @@ const newCachedSearch = (API_DATA, resultsDiv, backHistory) => {
 const showDiscography = (id, API_DATA, resultsDiv) => {
 
 
-    getCache(`discos${id}`)
-        .then(
+    const cache = getCache(`discos${id}`);
+
+    if (cache !== false) {
+        paintDiscography(cache.data, resultsDiv);
+    }
+    else {
+        fetchDisco(id, API_DATA, resultsDiv);
+    }
+
+
+
+    /*     .then(
             cache => {
                 console.log(cache)
 
@@ -321,7 +357,7 @@ const showDiscography = (id, API_DATA, resultsDiv) => {
             console.log(error, `discos${id}`);
             fetchDisco(id, API_DATA, resultsDiv);
         })
-
+ */
 }
 
 
@@ -335,7 +371,6 @@ const fetchDisco = (id, API_DATA, resultsDiv) => {
     const response = fetch(request)
         //obtenemos la discografía
         .then(response => {
-            console.log(response)
             return response.json()
         })
         .then(releases => {
@@ -385,19 +420,6 @@ const paintDiscography = (discography, resultsDiv) => {
     }
 
 }
-
-
-/* const getCache = (searchText) =>  {
-
-    return  localStorage.getItem(searchText);
-
-}
-
-const setCache = (searchText, searchObject) {
-
-    localStorage.setItem(searchText, searchObject);
-
-} */
 
 //------------------------------------MAIN------------------------------------
 const d = document;

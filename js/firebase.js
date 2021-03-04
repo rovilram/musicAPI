@@ -10,32 +10,36 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
+/* firebase.database().ref('cache2').set({
+    username: "nombre2",
+    email: "email2"
+}); */
 
 
-const setCache = (searchText, data) => {
-
-    //FIREBASE VERSION
-    console.log(`Datos de "${searchText}" guardados en FIREBASE`);
-    firebase.database().ref(searchText).set({
-        data: data
-    });
-
-
+const setFav = (favID) => {
+    console.log("guardando favorito:", favID);
+    firebase.database().ref(`fav/${favID}`).set(true);
 }
 
-const getCache = (searchText) => {
+
+
+
+const getFav = (favID) => {
     //FIREBASE VERSION
 
     //devolvemos una promesa
     return new Promise((resolv, reject) => {
 
-        firebase.database().ref(searchText).on('value', (data) => {
-            console.log("DENTRO FUNCION", data.val());
-            if (data.val() === null) reject("NO HAY DATOS GUARDADOS");
+        firebase.database().ref(`fav/${favID}`).on('value', (data) => {
+            if (data.val() !==true) reject("NO HAY DATOS GUARDADOS");
             else resolv(data.val());
         })
     })
 
 }
 
+const cleanFav = (favID) => {
+    firebase.database().ref(`fav/${favID}`).set(null);
+}
 
+//TODO: PROBAR GET!!!!

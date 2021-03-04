@@ -81,7 +81,7 @@ h2 {
 }
 
 .inputWrapper {
-  width:100%;
+  width: 100%;
 }
 .searchInput {
   width: 100%;
@@ -93,10 +93,15 @@ h2 {
   border: 1px solid black;
 }
 
+.detailBtnWrapper {
+  display: flex;
+}
+
 .searchBtn,
 .cleanBtn,
 .cacheBtn,
-.detailBtn {
+.backBtn,
+.favBtn {
   padding: 10px;
   margin: 10px;
   display: flex;
@@ -107,21 +112,24 @@ h2 {
   background-color: #ff0009;
   color: white;
 }
-footer {
-  display:flex;
-  justify-content: center;
-  margin:10px;
-  height: 10vh;
-}
 .cacheBtn {
   width: 100px;
 }
 
 .searchBtn:hover,
-.searchBtn2:hover,
-.detailBtn:hover {
+.cleanBtn:hover,
+.backBtn:hover,
+.cacheBtn:hover,
+.backBtn:hover,
+.favBtn:hover {
   background-color: #ffd700;
   color: black;
+}
+footer {
+  display: flex;
+  justify-content: center;
+  margin: 10px;
+  height: 10vh;
 }
 
 .results {
