@@ -89,7 +89,10 @@ const fetchArtists = (searchText, resultsDiv, API_DATA) => {
     });
 
     fetch(request)
-        .then(response => response.json())
+        .then(response => 
+            {console.log("HEADER",response.headers);
+                return response.json()
+            })
         .then(data => {
             const dataArtists = data.results;
             setCache(searchText, dataArtists);
@@ -168,10 +171,11 @@ const fetchArtist = (id, API_DATA, resultsDiv) => {
     });
     fetch(request)
         .then(response => {
-            console.log(response)
-            response.json()
+            console.log(response.headers);
+            return response.json()
         })
         .then(artist => {
+            console.log("AQUIUUUUUII", artist)
             setCache(`artist${id}`, artist);
             paintArtist(artist, resultsDiv, API_DATA);
         })
@@ -306,6 +310,8 @@ const showDiscography = (id, API_DATA, resultsDiv) => {
     getCache(`discos${id}`)
         .then(
             cache => {
+                console.log(cache)
+
                 console.log("Recogiendo datos de FIREBASE", cache.data)
                 paintDiscography(cache.data, resultsDiv); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
             }
@@ -330,7 +336,7 @@ const fetchDisco = (id, API_DATA, resultsDiv) => {
         //obtenemos la discografía
         .then(response => {
             console.log(response)
-            response.json()
+            return response.json()
         })
         .then(releases => {
             const discography = releases.releases;
