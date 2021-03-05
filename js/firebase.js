@@ -16,9 +16,9 @@ firebase.initializeApp(firebaseConfig);
 }); */
 
 
-const setFav = (favID) => {
+const setFav = (favID, favObject) => {
     console.log("guardando favorito:", favID);
-    firebase.database().ref(`fav/${favID}`).set(true);
+    firebase.database().ref(`fav/${favID}`).set(favObject);
 }
 
 
@@ -31,7 +31,7 @@ const getFav = (favID) => {
     return new Promise((resolv, reject) => {
 
         firebase.database().ref(`fav/${favID}`).on('value', (data) => {
-            if (data.val() !==true) reject("NO HAY DATOS GUARDADOS");
+            if (data.val() === null) reject("NO HAY DATOS GUARDADOS");
             else resolv(data.val());
         })
     })
@@ -42,4 +42,25 @@ const cleanFav = (favID) => {
     firebase.database().ref(`fav/${favID}`).set(null);
 }
 
-//TODO: PROBAR GET!!!!
+const getAllFav = () => {
+    return new Promise((resolv, reject) => {
+
+        firebase.database().ref("fav/").on('value', (data) => {
+            if (data.val() === null) reject("NO HAY DATOS GUARDADOS");
+            else resolv(data.val());
+        })
+    })
+}
+
+
+
+getAllFav()
+    .then(data=> {
+        console.log(data);
+
+
+        const array = Object.keys(data).map(el=> data[el]);
+
+
+        console.log("Firebase",array);
+    })

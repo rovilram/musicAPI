@@ -125,6 +125,18 @@ h2 {
   background-color: #ffd700;
   color: black;
 }
+
+
+.fav {
+  background-color:#ffd700;
+  color: black;
+}
+
+.fav:hover {
+  background:color#ff0009;
+  color: white;
+}
+
 footer {
   display: flex;
   justify-content: center;

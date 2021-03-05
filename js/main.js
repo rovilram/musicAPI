@@ -6,7 +6,7 @@ const API_DATA = {
     header: ['User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/']
 }
 
-let backHistory = {};
+//let backHistory = {};
 
 const getCache = (searchText) => {
     if (localStorage) {
@@ -45,14 +45,18 @@ const clearCache = () => localStorage.clear();
 
 
 
-const showMaster = (searchText, resultsDiv, API_DATA, backHistory) => {
+const showMaster = (searchText, resultsDiv, API_DATA) => {
 
-    //    const cache = 
+
+    //Primero recuperamos los favoritos de firebase
+
+
+
+    //Consulta a caché (localStorage) 
     const cache = getCache(searchText);
-
-
+    console.log("objeto CACHE", cache);
     if (cache !== false) {
-        paintArtists(cache, resultsDiv, API_DATA); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
+        paintArtists(cache, resultsDiv, API_DATA, searchText); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
     }
     else {
         fetchArtists(searchText, resultsDiv, API_DATA);
@@ -92,6 +96,8 @@ const fetchArtists = (searchText, resultsDiv, API_DATA) => {
         })
         .then(data => {
             const dataArtists = data.results;
+            console.log("objeto fetch", dataArtists)
+
             setCache(searchText, dataArtists);
             /*backHistory = {
                             searchText: searchText,
@@ -100,12 +106,12 @@ const fetchArtists = (searchText, resultsDiv, API_DATA) => {
             //localStorage.setItem("backHistory", JSON.stringify(backHistory));
             //console.log("backHistory Guardado:", JSON.parse(localStorage.getItem("backHistory")));
 
-            paintArtists(dataArtists, resultsDiv, API_DATA); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
+            paintArtists(dataArtists, resultsDiv, API_DATA, searchText); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
 
         });
 }
 
-const paintArtists = (dataArtists, resultsDiv, API_DATA) => {
+const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
 
     const newResultDiv = createNode("div", {
         className: "results"
@@ -116,7 +122,18 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA) => {
         const artistWrapper = createNode("div", {
             id: `divArtist${artist.id}`,
             className: "artistWrapper"
-        })
+        }, newResultDiv)
+        const artistFavBtnWrapper = createNode("div", {
+            className: "artistFavBtnWrapper",
+        }, artistWrapper);
+        const favBtn = createNode("Div", {
+            className: "favBtn",
+            innerText: "Favorito"
+        }, artistFavBtnWrapper);
+        //si es favorito marca el botón como favorito
+        getFav(`artist${artist.id}`)
+            .then(id => favBtn.classList.add("fav"))
+            .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
         createNode("div", {
             className: "artistName",
             innerText: artist.title
@@ -126,14 +143,34 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA) => {
             src: (artist.thumb) ? artist.thumb : "https://via.placeholder.com/150x150.png?text=NO+PHOTO"
         }, artistWrapper);
 
-        newResultDiv.appendChild(artistWrapper);
-
         resultsDiv.replaceWith(newResultDiv);
 
-        //Definimos aquí el evento que lleva al artista.    
-        d.querySelector(`#divArtist${artist.id}`).addEventListener("click", function () {
-            showDetail(artist.id, API_DATA, newResultDiv);
+
+        //Eventos
+        artistWrapper.addEventListener("click", e => {
+            if (e.target === favBtn) {
+                getFav(`artist${artist.id}`)
+                    .then(data => {
+                        console.log("YA ESTA GUARDADO COMO FAVORITO", `artist${artist.id}`, data);
+                        cleanFav(`artist${artist.id}`);
+                        console.log("BORRANDO", `artist${artist.id}`);
+                        favBtn.classList.remove("fav");
+                    })
+                    .catch(err => {
+                        console.log("NO ESTÁ GUARDADO", `artist${artist.id}`, err);
+                        setFav(`artist${artist.id}`, artist);
+                        console.log("GUARDANDO", `artist${artist.id}`);
+                        favBtn.classList.add("fav");
+                    })
+            }
+            else if (e.target === artistWrapper) {
+                showDetail(dataArtists,artist.id, API_DATA, newResultDiv, searchText);
+            }
+
         })
+
+
+
     });
 
 
@@ -142,7 +179,7 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA) => {
 
 
 
-const showDetail = (id, API_DATA, resultsDiv, backHistory) => {
+const showDetail = (artists, id, API_DATA, resultsDiv, searchText) => {
 
 
     const cache = getCache(`artist${id}`);
@@ -156,17 +193,17 @@ const showDetail = (id, API_DATA, resultsDiv, backHistory) => {
             }) */
 
     if (cache !== false) {
-        paintArtist(cache, resultsDiv, API_DATA); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
+        paintArtist(artists, cache, resultsDiv, API_DATA, searchText); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
     }
     else {
-        fetchArtist(id, API_DATA, resultsDiv);
+        fetchArtist(artists,id, API_DATA, resultsDiv, searchText);
     }
 
 
 }
 
 
-const fetchArtist = (id, API_DATA, resultsDiv) => {
+const fetchArtist = (artists,id, API_DATA, resultsDiv, searchText) => {
     const headers = new Headers();
     // add headers
     headers.append('User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/');
@@ -179,11 +216,11 @@ const fetchArtist = (id, API_DATA, resultsDiv) => {
         })
         .then(artist => {
             setCache(`artist${id}`, artist);
-            paintArtist(artist, resultsDiv, API_DATA);
+            paintArtist(artists,artist, resultsDiv, API_DATA, searchText);
         })
 }
 
-const paintArtist = (artist, resultsDiv, API_DATA) => {
+const paintArtist = (artists,artist, resultsDiv, API_DATA, searchText) => {
     const newResultDiv = createNode("div", {
         className: "results",
     });
@@ -201,6 +238,10 @@ const paintArtist = (artist, resultsDiv, API_DATA) => {
         className: "favBtn",
         innerText: "Favorito"
     }, detailBtnWrapper);
+    //si es favorito marca el botón como favorito
+    getFav(`artist${artist.id}`)
+        .then(id => favBtn.classList.add("fav"))
+        .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
 
     createNode("h2", {
         className: "artistData",
@@ -252,7 +293,10 @@ const paintArtist = (artist, resultsDiv, API_DATA) => {
 
     //EVENTO BOTÓN REGRESAR
     backBtn.addEventListener("click", () => {
-        newResultDiv.replaceWith(resultsDiv);
+        //newResultDiv.replaceWith(resultsDiv);
+        showMaster(searchText, newResultDiv, API_DATA);
+
+
 
         //Aqui vamos a hacer la implementación de la caché
         //        newCachedSearch(API_DATA, resultsDiv, backHistory);
@@ -261,17 +305,22 @@ const paintArtist = (artist, resultsDiv, API_DATA) => {
 
     //EVENTO BOTÓN FAVORITO
     favBtn.addEventListener("click", () => {
-        getFav(`artist${artist.id}`)
+        getFav(`artists${artist.id}`)
             .then(data => {
-                console.log("YA ESTA GUARDADO COMO FAVORITO", `artist${artist.id}`, data);
+                console.log("YA ESTA GUARDADO COMO FAVORITO", `artists${artist.id}`, data);
                 cleanFav(`artist${artist.id}`);
-                console.log("BORRANDO", `artist${artist.id}`);
+                console.log("BORRANDO", `artists${artist.id}`);
+                favBtn.classList.remove("fav");
             })
             .catch(err => {
-                console.log("NO ESTÁ GUARDADO", `artist${artist.id}`, err);
-                setFav(`artist${artist.id}`);
+                console.log("NO ESTÁ GUARDADO", `artists${artist.id}`, err);
+                //selecciono el artista del array artistas
+                //para guardarlo en favoritos para el listado maestro.
+                const myArtist=artists.filter(el=>el.id ===artist.id)[0];
+                setFav(`artist${artist.id}`, myArtist);
                 console.log("GUARDANDO", `artist${artist.id}`);
-        })
+                favBtn.classList.add("fav");
+            })
     })
 
 
@@ -347,12 +396,12 @@ const showDiscography = (id, API_DATA, resultsDiv) => {
     /*     .then(
             cache => {
                 console.log(cache)
-
+ 
                 console.log("Recogiendo datos de FIREBASE", cache.data)
                 paintDiscography(cache.data, resultsDiv); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
             }
         )
-
+ 
         .catch(error => {
             console.log(error, `discos${id}`);
             fetchDisco(id, API_DATA, resultsDiv);
@@ -431,7 +480,7 @@ d.querySelector(".searchBtn").addEventListener("click", () => {
     const resultsDiv = d.querySelector(".results");
     const searchText = d.querySelector(".searchInput").value;
     d.querySelector(".searchSection").classList.add("masterVersion");
-    showMaster(searchText, resultsDiv, API_DATA, backHistory)
+    showMaster(searchText, resultsDiv, API_DATA)
 
 })
 d.querySelector(".cleanBtn").addEventListener("click", () => {
