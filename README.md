@@ -1,6 +1,24 @@
 # musicAPI
 <https://rovilram.github.io/musicAPI/>
 
+
+## FUNCIONALIDADES:
+* Búsqueda de bandas musicales, obteniendo un listado maestro que nos lleva a un listado detalle.
+* Todo carga en SPA
+* botón de regreso de detalle a maestro, y para volver a estado inicial la aplicación.
+* Persistencia de datos (caché) en localStorage para evitar fetch innecesarios
+* botón de borrado de datos de caché localStorage
+* Permite elección de favoritos de bandas en listado maestro y también en listado detalle.
+* Persistencia de datos de favoritos en Firebase (de todo el objeto que permita pintarlo en el listado maestro)
+* Los Favoritos en el listado maestro van a aparecer encima del resto de búsqueda
+
+## TODO:
+* refactorizar
+* refactorizar CSS y aplicar mobile first
+* Hacer caché de repintado (si se actualiza un listado maestro no lo borramos del todo, solo quitamos los elementos que ya no necesitamos en la nueva búsqueda, y ponemos los nuevos)
+* Mejorar función searchFav ya que ahora estamos haciendo el filtrado en frontend, ya que no entiendo como hacer una búsqueda en firebase;
+
+## REQUISITOS
 (cambio requisitos 04/03/21)
 -- Modo normal --
 

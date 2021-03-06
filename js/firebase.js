@@ -10,14 +10,9 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-/* firebase.database().ref('cache2').set({
-    username: "nombre2",
-    email: "email2"
-}); */
-
 
 const setFav = (favID, favObject) => {
-    console.log("guardando favorito:", favID);
+    console.log("guardando favorito:", favID, favObject);
     firebase.database().ref(`fav/${favID}`).set(favObject);
 }
 
@@ -42,25 +37,22 @@ const cleanFav = (favID) => {
     firebase.database().ref(`fav/${favID}`).set(null);
 }
 
-const getAllFav = () => {
+const searchFav = (searchText) => {
     return new Promise((resolv, reject) => {
 
         firebase.database().ref("fav/").on('value', (data) => {
             if (data.val() === null) reject("NO HAY DATOS GUARDADOS");
-            else resolv(data.val());
+            else {
+                console.log(data.val())
+                const allFav = data.val();
+                const favData = Object.keys(allFav).map(key => allFav[key]);
+                console.log(favData);
+                const favFilter = favData.filter(el => el.title.toLowerCase().includes(searchText))
+                console.log("fav filter", favFilter);
+                resolv(favFilter);
+            }
         })
     })
 }
 
 
-
-getAllFav()
-    .then(data=> {
-        console.log(data);
-
-
-        const array = Object.keys(data).map(el=> data[el]);
-
-
-        console.log("Firebase",array);
-    })

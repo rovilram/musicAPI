@@ -32,35 +32,41 @@ const setCache = (searchText, data) => {
     }
 };
 
-
-
-
-
-
-
 const clearCache = () => localStorage.clear();
-
-
-
-
-
 
 const showMaster = (searchText, resultsDiv, API_DATA) => {
 
+    let favData = [];
+    let artistsData = [];
+    let fetchData = [];
 
     //Primero recuperamos los favoritos de firebase
+    console.log("searchText", searchText)
+    searchFav(searchText)
+        .then(data => {
+            favData = Object.keys(data).map(key => data[key]);
+            console.log("favData", favData)
+            //Consulta a caché (localStorage) 
+            let cacheData = getCache(searchText);
+            console.log("objeto CACHE", cacheData);
+            if (cacheData !== false) {
+                cacheData = cacheData.filter(
+                        cache => !favData.some(fav => fav.id === cache.id)
+                    )
 
+                artistsData = favData.concat(cacheData);
+                console.log("artistsData", artistsData)
+            }
+            else {
+                fetchData = fetchArtists(searchText, API_DATA);
+                fetchData = fetchData.filter (
+                    fetchD => !favData.some(fav => fav.id === fetchD.id)
+                )
+                artistsData = favData.concat(fetchData);
+            }
 
-
-    //Consulta a caché (localStorage) 
-    const cache = getCache(searchText);
-    console.log("objeto CACHE", cache);
-    if (cache !== false) {
-        paintArtists(cache, resultsDiv, API_DATA, searchText); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
-    }
-    else {
-        fetchArtists(searchText, resultsDiv, API_DATA);
-    }
+            paintArtists(artistsData, resultsDiv, API_DATA, searchText); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
+        })
 
 
     /*         .then(
@@ -80,7 +86,7 @@ const showMaster = (searchText, resultsDiv, API_DATA) => {
 
 }
 
-const fetchArtists = (searchText, resultsDiv, API_DATA) => {
+const fetchArtists = (searchText, API_DATA) => {
 
     const headers = new Headers();
     // add headers
@@ -106,7 +112,7 @@ const fetchArtists = (searchText, resultsDiv, API_DATA) => {
             //localStorage.setItem("backHistory", JSON.stringify(backHistory));
             //console.log("backHistory Guardado:", JSON.parse(localStorage.getItem("backHistory")));
 
-            paintArtists(dataArtists, resultsDiv, API_DATA, searchText); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
+            return dataArtists;
 
         });
 }
@@ -155,16 +161,22 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
                         cleanFav(`artist${artist.id}`);
                         console.log("BORRANDO", `artist${artist.id}`);
                         favBtn.classList.remove("fav");
+                        showMaster(searchText, newResultDiv, API_DATA);
+                        console.log("FUERA")
                     })
                     .catch(err => {
+                        //añadimos en el objeto a guardar un campo para poder buscar en Firebase (no tiene búsqueda caseinsensitive)
+                        artist.titleSearch = artist.title.toLowerCase();
                         console.log("NO ESTÁ GUARDADO", `artist${artist.id}`, err);
                         setFav(`artist${artist.id}`, artist);
                         console.log("GUARDANDO", `artist${artist.id}`);
                         favBtn.classList.add("fav");
+                        showMaster(searchText, newResultDiv, API_DATA);
+                        console.log("FUERA")
                     })
             }
             else if (e.target === artistWrapper) {
-                showDetail(dataArtists,artist.id, API_DATA, newResultDiv, searchText);
+                showDetail(dataArtists, artist.id, API_DATA, newResultDiv, searchText);
             }
 
         })
@@ -196,14 +208,14 @@ const showDetail = (artists, id, API_DATA, resultsDiv, searchText) => {
         paintArtist(artists, cache, resultsDiv, API_DATA, searchText); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
     }
     else {
-        fetchArtist(artists,id, API_DATA, resultsDiv, searchText);
+        fetchArtist(artists, id, API_DATA, resultsDiv, searchText);
     }
 
 
 }
 
 
-const fetchArtist = (artists,id, API_DATA, resultsDiv, searchText) => {
+const fetchArtist = (artists, id, API_DATA, resultsDiv, searchText) => {
     const headers = new Headers();
     // add headers
     headers.append('User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/');
@@ -216,11 +228,11 @@ const fetchArtist = (artists,id, API_DATA, resultsDiv, searchText) => {
         })
         .then(artist => {
             setCache(`artist${id}`, artist);
-            paintArtist(artists,artist, resultsDiv, API_DATA, searchText);
+            paintArtist(artists, artist, resultsDiv, API_DATA, searchText);
         })
 }
 
-const paintArtist = (artists,artist, resultsDiv, API_DATA, searchText) => {
+const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
     const newResultDiv = createNode("div", {
         className: "results",
     });
@@ -311,15 +323,20 @@ const paintArtist = (artists,artist, resultsDiv, API_DATA, searchText) => {
                 cleanFav(`artist${artist.id}`);
                 console.log("BORRANDO", `artists${artist.id}`);
                 favBtn.classList.remove("fav");
+
             })
             .catch(err => {
                 console.log("NO ESTÁ GUARDADO", `artists${artist.id}`, err);
                 //selecciono el artista del array artistas
                 //para guardarlo en favoritos para el listado maestro.
-                const myArtist=artists.filter(el=>el.id ===artist.id)[0];
+                const myArtist = artists.filter(el => el.id === artist.id)[0];
+                //añadimos en el objeto a guardar un campo para poder buscar en Firebase (no tiene búsqueda caseinsensitive)
                 setFav(`artist${artist.id}`, myArtist);
                 console.log("GUARDANDO", `artist${artist.id}`);
                 favBtn.classList.add("fav");
+
+
+
             })
     })
 
