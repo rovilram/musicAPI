@@ -13,7 +13,7 @@ const getCache = (searchText) => {
         const cache = JSON.parse(localStorage.getItem(searchText));
         if (cache != null) {
             //hay datos y los devuelvo
-            console.log("CACHE", searchText);
+            console.log("Obteniendo datos de LOCALSTORAGE", searchText);
             return cache;
         }
         else {
@@ -36,21 +36,19 @@ const clearCache = () => localStorage.clear();
 
 const showMaster = (searchText, resultsDiv, API_DATA) => {
 
-    let favData = [];
-    let artistsData = [];
-    let fetchData = [];
+
 
     //Primero recuperamos los favoritos de firebase
-    console.log("searchText", searchText)
     searchFav(searchText)
         .then(data => {
+            let favData = [];
+            let artistsData = [];
             //organizamos el objeto recibido para que sea igual
             //al recibido de localStorage y fetch
             favData = Object.keys(data).map(key => data[key]);
 
             //Consulta a caché (localStorage) 
             let cacheData = getCache(searchText);
-            console.log("objeto CACHE", cacheData);
             if (cacheData !== false) {
                 //quitamos los resultados que están en favoritos
                 cacheData = cacheData.filter(
@@ -58,25 +56,27 @@ const showMaster = (searchText, resultsDiv, API_DATA) => {
                 )
                 //unimos los datos de favoritos y caché
                 artistsData = favData.concat(cacheData);
+                paintArtists(artistsData, resultsDiv, API_DATA, searchText);
             }
             else {
                 //si no está en caché hacemos el fetch
-                fetchData = fetchArtists(searchText, API_DATA);
-                //quitamos los resultados que están en favoritos
-                fetchData = fetchData.filter(
-                    fetchD => !favData.some(fav => fav.id === fetchD.id)
-                )
-                //unimos los datos de favoritos y fetch
-                artistsData = favData.concat(fetchData);
+                fetchArtists(searchText, API_DATA)
+                    .then(fetchData => {
+                        //quitamos los resultados que están en favoritos
+                        fetchData = fetchData.filter(
+                            fetchD => !favData.some(fav => fav.id === fetchD.id)
+                        )
+                        //unimos los datos de favoritos y fetch
+                        artistsData = favData.concat(fetchData);
+                        paintArtists(artistsData, resultsDiv, API_DATA, searchText);
+                    })
             }
-
-            paintArtists(artistsData, resultsDiv, API_DATA, searchText); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
         })
 
 }
 
-const fetchArtists = (searchText, API_DATA) => {
-
+const fetchArtists = async (searchText, API_DATA) => {
+    //RECURSO PARA HACER UN AWAIT DE UN FETCH https://dmitripavlutin.com/javascript-fetch-async-await/
     const headers = new Headers();
     // add headers
     headers.append(...API_DATA.header);
@@ -84,14 +84,10 @@ const fetchArtists = (searchText, API_DATA) => {
         headers: headers
     });
 
-    fetch(request)
-        .then(response => response.json())
-        .then(data => {
-            const dataArtists = data.results;
-            console.log("objeto fetch", dataArtists)
-            setCache(searchText, dataArtists);
-            return dataArtists;
-        });
+    const response = await fetch(request);
+    const dataArtists = await response.json();
+    setCache(searchText, dataArtists.results);
+    return await dataArtists.results;
 }
 
 const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
@@ -166,25 +162,30 @@ const showDetail = (artists, id, API_DATA, resultsDiv, searchText) => {
         paintArtist(artists, cache, resultsDiv, API_DATA, searchText);
     }
     else {
-        fetchArtist(id, API_DATA);
-        paintArtist(artists, artist, resultsDiv, API_DATA, searchText);
+        fetchArtist(id, API_DATA)
+            .then(artist =>
+                paintArtist(artists, artist, resultsDiv, API_DATA, searchText)
+            )
     }
 }
 
-
-const fetchArtist = (id, API_DATA) => {
+const fetchArtist = async (id, API_DATA) => {
     const headers = new Headers();
     // add headers
     headers.append(...API_DATA.header);
-    const request = new Request(`${api.url}artists/${id}?token=${API_DATA.token}`, {
+    const request = new Request(`${API_DATA.url}artists/${id}?token=${API_DATA.token}`, {
         headers: headers
     });
-    fetch(request)
-        .then(response => response.json())
-        .then(artist => {
-            setCache(`artist${id}`, artist);
-            return artist;
-        })
+    const response = await fetch(request);
+    const artist = await response.json();
+
+    setCache(`artist${id}`, artist);
+    return await artist;
+    /*       .then(response => response.json())
+          .then(artist => {
+              setCache(`artist${id}`, artist);
+              return artist;
+          }) */
 }
 
 const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
@@ -277,55 +278,6 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
     })
 }
 
-const compareArrays = (oldArray, newArray) => {
-
-    console.log("VIEJO", oldArray);
-    console.log("NUEVO", newArray);
-
-    const addsArray = newArray.filter(elnew => !oldArray.some(elold => elold.id === elnew.id));
-    const delsArray = oldArray.filter(elold => !newArray.some(elnew => elold.id === elnew.id));
-
-    console.log("AÑADIR", addsArray);
-    console.log("QUITAR", delsArray);
-
-    return [addsArray, delsArray];
-}
-
-const newCachedSearch = (API_DATA, resultsDiv, backHistory) => {
-
-    //hacemos una nueva consulta a la API para ver si hay cambios
-    //vamos a simular que hay menos datos empleando una búsqueda que recoja menos datos de la API
-    console.log(backHistory)
-
-
-    const headers = new Headers();
-    // add headers
-    headers.append('User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/');
-    const request = new Request(`${API_DATA.url}/database/search?q=${backHistory.searchText}&token=${API_DATA.token}&type=artist&per_page=5`, {
-        headers: headers
-    });
-    const response = fetch(request)
-        .then(response => response.json())
-        .then(data => {
-            const newDataArtists = data.results;
-
-            const [addsArray, delsArray] = compareArrays(backHistory.resultsArray, newDataArtists);
-
-            console.log("DELS ARRAY", delsArray)
-
-            //quitamos elementos desactualizados
-            delsArray.forEach(el => resultsDiv.querySelector(`#divArtist${el.id}`).remove())
-
-            //añadimos los nuevos elementos
-            //TODO: ME HE QUEDADO POR AQUI. VER COMO HACER QUE ME AÑADA LOS NUEVOS. HAY QUE FORZAR UN NUEVO ELEMENTO
-
-
-
-
-
-        })
-    console.log("RESPONSE:", response);
-}
 
 
 const showDiscography = (id, API_DATA, resultsDiv) => {
@@ -340,22 +292,6 @@ const showDiscography = (id, API_DATA, resultsDiv) => {
         fetchDisco(id, API_DATA, resultsDiv);
     }
 
-
-
-    /*     .then(
-            cache => {
-                console.log(cache)
- 
-                console.log("Recogiendo datos de FIREBASE", cache.data)
-                paintDiscography(cache.data, resultsDiv); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
-            }
-        )
- 
-        .catch(error => {
-            console.log(error, `discos${id}`);
-            fetchDisco(id, API_DATA, resultsDiv);
-        })
- */
 }
 
 
@@ -366,7 +302,7 @@ const fetchDisco = (id, API_DATA, resultsDiv) => {
     const request = new Request(`${API_DATA.url}/artists/${id}/releases?token=${API_DATA.token}&sort=year`, {
         headers: headers
     });
-    const response = fetch(request)
+    fetch(request)
         //obtenemos la discografía
         .then(response => {
             return response.json()
@@ -419,10 +355,55 @@ const paintDiscography = (discography, resultsDiv) => {
 
 }
 
+const compareArrays = (oldArray, newArray) => {
+
+    console.log("VIEJO", oldArray);
+    console.log("NUEVO", newArray);
+
+    const addsArray = newArray.filter(elnew => !oldArray.some(elold => elold.id === elnew.id));
+    const delsArray = oldArray.filter(elold => !newArray.some(elnew => elold.id === elnew.id));
+
+    console.log("AÑADIR", addsArray);
+    console.log("QUITAR", delsArray);
+
+    return [addsArray, delsArray];
+}
+
+const newCachedSearch = (API_DATA, resultsDiv, backHistory) => {
+
+    //hacemos una nueva consulta a la API para ver si hay cambios
+    //vamos a simular que hay menos datos empleando una búsqueda que recoja menos datos de la API
+    console.log(backHistory)
+
+
+    const headers = new Headers();
+    // add headers
+    headers.append('User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/');
+    const request = new Request(`${API_DATA.url}/database/search?q=${backHistory.searchText}&token=${API_DATA.token}&type=artist&per_page=5`, {
+        headers: headers
+    });
+    const response = fetch(request)
+        .then(response => response.json())
+        .then(data => {
+            const newDataArtists = data.results;
+
+            const [addsArray, delsArray] = compareArrays(backHistory.resultsArray, newDataArtists);
+
+            console.log("DELS ARRAY", delsArray)
+
+            //quitamos elementos desactualizados
+            delsArray.forEach(el => resultsDiv.querySelector(`#divArtist${el.id}`).remove())
+
+            //añadimos los nuevos elementos
+            //TODO: ME HE QUEDADO POR AQUI. VER COMO HACER QUE ME AÑADA LOS NUEVOS. HAY QUE FORZAR UN NUEVO ELEMENTO
+
+        })
+    console.log("RESPONSE:", response);
+}
+
+
 //------------------------------------MAIN------------------------------------
 const d = document;
-//TODO: Usar localStorage para guardar el estado actual de la web
-//if (localStorage) console.log("OK LOCALSTORAGE")
 
 //------------------------------------EVENTS------------------------------------
 d.querySelector(".searchBtn").addEventListener("click", () => {

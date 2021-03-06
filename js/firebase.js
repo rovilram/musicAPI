@@ -36,7 +36,7 @@ const cleanFav = (favID) => {
 const searchFav = (searchText) => {
     return new Promise((resolv, reject) => {
         firebase.database().ref("fav/").on('value', (data) => {
-            if (data.val() === null) reject("NO HAY DATOS GUARDADOS");
+            if (data.val() === null) resolv([]);
             else {
                 const allFav = data.val();
                 const favData = Object.keys(allFav).map(key => allFav[key]);
