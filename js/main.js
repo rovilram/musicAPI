@@ -44,45 +44,34 @@ const showMaster = (searchText, resultsDiv, API_DATA) => {
     console.log("searchText", searchText)
     searchFav(searchText)
         .then(data => {
+            //organizamos el objeto recibido para que sea igual
+            //al recibido de localStorage y fetch
             favData = Object.keys(data).map(key => data[key]);
-            console.log("favData", favData)
+
             //Consulta a caché (localStorage) 
             let cacheData = getCache(searchText);
             console.log("objeto CACHE", cacheData);
             if (cacheData !== false) {
+                //quitamos los resultados que están en favoritos
                 cacheData = cacheData.filter(
-                        cache => !favData.some(fav => fav.id === cache.id)
-                    )
-
+                    cache => !favData.some(fav => fav.id === cache.id)
+                )
+                //unimos los datos de favoritos y caché
                 artistsData = favData.concat(cacheData);
-                console.log("artistsData", artistsData)
             }
             else {
+                //si no está en caché hacemos el fetch
                 fetchData = fetchArtists(searchText, API_DATA);
-                fetchData = fetchData.filter (
+                //quitamos los resultados que están en favoritos
+                fetchData = fetchData.filter(
                     fetchD => !favData.some(fav => fav.id === fetchD.id)
                 )
+                //unimos los datos de favoritos y fetch
                 artistsData = favData.concat(fetchData);
             }
 
             paintArtists(artistsData, resultsDiv, API_DATA, searchText); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
         })
-
-
-    /*         .then(
-                cache => {
-                    console.log("Recogiendo datos de FIREBASE", searchText)
-                    paintArtists(cache.data, resultsDiv, API_DATA); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
-                }
-            )
-            .catch(
-                error => {
-                    console.log(error, searchText);
-                    fetchArtists(searchText, resultsDiv, API_DATA);
-                }
-            ) */
-
-
 
 }
 
@@ -96,24 +85,12 @@ const fetchArtists = (searchText, API_DATA) => {
     });
 
     fetch(request)
-        .then(response => {
-            console.log("HEADER", response.headers);
-            return response.json()
-        })
+        .then(response => response.json())
         .then(data => {
             const dataArtists = data.results;
             console.log("objeto fetch", dataArtists)
-
             setCache(searchText, dataArtists);
-            /*backHistory = {
-                            searchText: searchText,
-                            resultsArray: dataArtists
-            } */
-            //localStorage.setItem("backHistory", JSON.stringify(backHistory));
-            //console.log("backHistory Guardado:", JSON.parse(localStorage.getItem("backHistory")));
-
             return dataArtists;
-
         });
 }
 
@@ -123,7 +100,7 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
         className: "results"
     })
 
-    dataArtists.forEach(artist => {
+    dataArtists.map(artist => {
 
         const artistWrapper = createNode("div", {
             id: `divArtist${artist.id}`,
@@ -153,36 +130,25 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
 
 
         //Eventos
+        //Botón favoritos
         artistWrapper.addEventListener("click", e => {
             if (e.target === favBtn) {
-                getFav(`artist${artist.id}`)
-                    .then(data => {
-                        console.log("YA ESTA GUARDADO COMO FAVORITO", `artist${artist.id}`, data);
-                        cleanFav(`artist${artist.id}`);
-                        console.log("BORRANDO", `artist${artist.id}`);
-                        favBtn.classList.remove("fav");
-                        showMaster(searchText, newResultDiv, API_DATA);
-                        console.log("FUERA")
-                    })
-                    .catch(err => {
-                        //añadimos en el objeto a guardar un campo para poder buscar en Firebase (no tiene búsqueda caseinsensitive)
-                        artist.titleSearch = artist.title.toLowerCase();
-                        console.log("NO ESTÁ GUARDADO", `artist${artist.id}`, err);
-                        setFav(`artist${artist.id}`, artist);
-                        console.log("GUARDANDO", `artist${artist.id}`);
-                        favBtn.classList.add("fav");
-                        showMaster(searchText, newResultDiv, API_DATA);
-                        console.log("FUERA")
-                    })
+                if (favBtn.classList.contains("fav")) {
+                    cleanFav(`artist${artist.id}`);
+                    favBtn.classList.remove("fav");
+                    showMaster(searchText, newResultDiv, API_DATA);
+                }
+                else {
+                    setFav(`artist${artist.id}`, artist);
+                    favBtn.classList.add("fav");
+                    showMaster(searchText, newResultDiv, API_DATA);
+                }
             }
+            //div de listado maestro
             else if (e.target === artistWrapper) {
                 showDetail(dataArtists, artist.id, API_DATA, newResultDiv, searchText);
             }
-
         })
-
-
-
     });
 
 
@@ -193,42 +159,31 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
 
 const showDetail = (artists, id, API_DATA, resultsDiv, searchText) => {
 
-
     const cache = getCache(`artist${id}`);
-    /*         .then(cache => {
-                console.log("Recogiendo datos de FIREBASE", `artist${id}`)
-                paintArtist(cache, resultsDiv, API_DATA);; //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
-            })
-            .catch(error => {
-                console.log(error, `artist${id}`);
-                fetchArtist(id, API_DATA, resultsDiv);
-            }) */
 
     if (cache !== false) {
-        paintArtist(artists, cache, resultsDiv, API_DATA, searchText); //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
+        //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
+        paintArtist(artists, cache, resultsDiv, API_DATA, searchText);
     }
     else {
-        fetchArtist(artists, id, API_DATA, resultsDiv, searchText);
+        fetchArtist(id, API_DATA);
+        paintArtist(artists, artist, resultsDiv, API_DATA, searchText);
     }
-
-
 }
 
 
-const fetchArtist = (artists, id, API_DATA, resultsDiv, searchText) => {
+const fetchArtist = (id, API_DATA) => {
     const headers = new Headers();
     // add headers
-    headers.append('User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/');
-    const request = new Request(`https://api.discogs.com/artists/${id}?token=${API_DATA.token}`, {
+    headers.append(...API_DATA.header);
+    const request = new Request(`${api.url}artists/${id}?token=${API_DATA.token}`, {
         headers: headers
     });
     fetch(request)
-        .then(response => {
-            return response.json()
-        })
+        .then(response => response.json())
         .then(artist => {
             setCache(`artist${id}`, artist);
-            paintArtist(artists, artist, resultsDiv, API_DATA, searchText);
+            return artist;
         })
 }
 
@@ -250,6 +205,7 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
         className: "favBtn",
         innerText: "Favorito"
     }, detailBtnWrapper);
+
     //si es favorito marca el botón como favorito
     getFav(`artist${artist.id}`)
         .then(id => favBtn.classList.add("fav"))
@@ -280,7 +236,6 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
 
     //FORMACIÓN
     if (artist.members) {
-
         const membersDiv = createNode("div", {
             className: "artistData members",
         });
@@ -288,7 +243,7 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
             className: "membersTitle",
             innerText: "Formación"
         }, membersDiv);
-        artist.members.forEach(
+        artist.members.map(
             member => {
                 createNode("div", {
                     className: "artistData member",
@@ -301,48 +256,25 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
     resultsDiv.replaceWith(newResultDiv);
     showDiscography(artist.id, API_DATA, newResultDiv);
 
-
-
     //EVENTO BOTÓN REGRESAR
     backBtn.addEventListener("click", () => {
-        //newResultDiv.replaceWith(resultsDiv);
         showMaster(searchText, newResultDiv, API_DATA);
-
-
-
-        //Aqui vamos a hacer la implementación de la caché
-        //        newCachedSearch(API_DATA, resultsDiv, backHistory);
-
     })
 
     //EVENTO BOTÓN FAVORITO
     favBtn.addEventListener("click", () => {
-        getFav(`artists${artist.id}`)
-            .then(data => {
-                console.log("YA ESTA GUARDADO COMO FAVORITO", `artists${artist.id}`, data);
-                cleanFav(`artist${artist.id}`);
-                console.log("BORRANDO", `artists${artist.id}`);
-                favBtn.classList.remove("fav");
-
-            })
-            .catch(err => {
-                console.log("NO ESTÁ GUARDADO", `artists${artist.id}`, err);
-                //selecciono el artista del array artistas
-                //para guardarlo en favoritos para el listado maestro.
-                const myArtist = artists.filter(el => el.id === artist.id)[0];
-                //añadimos en el objeto a guardar un campo para poder buscar en Firebase (no tiene búsqueda caseinsensitive)
-                setFav(`artist${artist.id}`, myArtist);
-                console.log("GUARDANDO", `artist${artist.id}`);
-                favBtn.classList.add("fav");
-
-
-
-            })
+        if (favBtn.classList.contains("fav")) {
+            cleanFav(`artist${artist.id}`);
+            favBtn.classList.remove("fav");
+        }
+        else {
+            //selecciono el artista del array artistas
+            //para guardarlo en favoritos para el listado maestro.
+            const myArtist = artists.filter(el => el.id === artist.id)[0];
+            setFav(`artist${artist.id}`, myArtist);
+            favBtn.classList.add("fav");
+        }
     })
-
-
-
-
 }
 
 const compareArrays = (oldArray, newArray) => {

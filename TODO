@@ -9,4 +9,8 @@ TODO:
 ☐ NO SE HACER BÚSQUEDAS EN FIREBASE, LAS ESTOY HACIENDO DIRECTAMENTE EN FRONT BAJÁNDOME TODO CADA VEZ QUE CARGO EL MAESTRO.
 
 
-
+BUGS:
+    * IMPORTANT: No funciona el colocar los favoritos primero
+    * En maestro no acepta click para ir a detalle si pincho en el texto
+    * Quitar cambio de color en hover de botón favoritos para que no de a engaño
+    * Ver gestión de errores en fetch

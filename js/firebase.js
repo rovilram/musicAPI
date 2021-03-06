@@ -20,17 +20,13 @@ const setFav = (favID, favObject) => {
 
 
 const getFav = (favID) => {
-    //FIREBASE VERSION
-
     //devolvemos una promesa
     return new Promise((resolv, reject) => {
-
         firebase.database().ref(`fav/${favID}`).on('value', (data) => {
             if (data.val() === null) reject("NO HAY DATOS GUARDADOS");
             else resolv(data.val());
         })
     })
-
 }
 
 const cleanFav = (favID) => {
@@ -39,16 +35,12 @@ const cleanFav = (favID) => {
 
 const searchFav = (searchText) => {
     return new Promise((resolv, reject) => {
-
         firebase.database().ref("fav/").on('value', (data) => {
             if (data.val() === null) reject("NO HAY DATOS GUARDADOS");
             else {
-                console.log(data.val())
                 const allFav = data.val();
                 const favData = Object.keys(allFav).map(key => allFav[key]);
-                console.log(favData);
                 const favFilter = favData.filter(el => el.title.toLowerCase().includes(searchText))
-                console.log("fav filter", favFilter);
                 resolv(favFilter);
             }
         })
