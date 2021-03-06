@@ -127,31 +127,25 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
 
         //Eventos
         //Botón favoritos
-        artistWrapper.addEventListener("click", e => {
-            if (e.target === favBtn) {
-                if (favBtn.classList.contains("fav")) {
-                    cleanFav(`artist${artist.id}`);
-                    favBtn.classList.remove("fav");
-                    showMaster(searchText, newResultDiv, API_DATA);
-                }
-                else {
-                    setFav(`artist${artist.id}`, artist);
-                    favBtn.classList.add("fav");
-                    showMaster(searchText, newResultDiv, API_DATA);
-                }
+        favBtn.addEventListener("click", () => {
+
+            if (favBtn.classList.contains("fav")) {
+                cleanFav(`artist${artist.id}`);
+                favBtn.classList.remove("fav");
+                showMaster(searchText, newResultDiv, API_DATA);
             }
-            //div de listado maestro
-            else if (e.target === artistWrapper) {
-                showDetail(dataArtists, artist.id, API_DATA, newResultDiv, searchText);
+            else {
+                setFav(`artist${artist.id}`, artist);
+                favBtn.classList.add("fav");
+                showMaster(searchText, newResultDiv, API_DATA);
             }
         })
-    });
-
-
-
+        artistWrapper.addEventListener("click", () => {
+            showDetail(dataArtists, artist.id, API_DATA, newResultDiv, searchText);
+        })
+        
+    })
 }
-
-
 
 const showDetail = (artists, id, API_DATA, resultsDiv, searchText) => {
 
