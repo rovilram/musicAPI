@@ -107,11 +107,12 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
         }, artistWrapper);
         const favBtn = createNode("Div", {
             className: "favBtn",
-            innerHTML: '<i class="fas fa-heart"></i>' 
+            innerHTML: '<i class="far fa-heart"></i>' 
         }, artistFavBtnWrapper);
         //si es favorito marca el botón como favorito
         getFav(`artist${artist.id}`)
             .then(id => favBtn.classList.add("fav"))
+            .then(() => favBtn.innerHTML='<i class="fas fa-heart"></i>')
             .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
         createNode("div", {
             className: "artistName",
@@ -140,6 +141,8 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
                 lastFavDiv.after(favDiv);
                 cleanFav(`artist${artist.id}`);
                 favBtn.classList.remove("fav");
+                favBtn.innerHTML='<i class="far fa-heart"></i>'
+
 
             }
             else {
@@ -148,6 +151,8 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
                 //showMaster(searchText, newResultDiv, API_DATA);
                 //No hace falta dibujar todo, solo lo cambiamos de sitio.
                 parentDiv.prepend(favDiv)
+                favBtn.innerHTML='<i class="fas fa-heart"></i>'
+
             }
 
         })
@@ -209,12 +214,13 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
 
     const favBtn = createNode("Div", {
         className: "favBtn",
-        innerText: '<i class="fas fa-heart"></i>'
+        innerHTML: '<i class="fas fa-heart"></i>'
     }, detailBtnWrapper);
 
     //si es favorito marca el botón como favorito
     getFav(`artist${artist.id}`)
         .then(id => favBtn.classList.add("fav"))
+        .then(() => favBtn.innerHTML='<i class="fas fa-heart"></i>')
         .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
 
     createNode("h2", {
@@ -272,6 +278,8 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
         if (favBtn.classList.contains("fav")) {
             cleanFav(`artist${artist.id}`);
             favBtn.classList.remove("fav");
+            favBtn.innerHTML='<i class="far fa-heart"></i>';
+
         }
         else {
             //selecciono el artista del array artistas
@@ -279,6 +287,9 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
             const myArtist = artists.filter(el => el.id === artist.id)[0];
             setFav(`artist${artist.id}`, myArtist);
             favBtn.classList.add("fav");
+            favBtn.innerHTML='<i class="fas  fa-heart"></i>';
+
+
         }
     })
 }
@@ -360,51 +371,7 @@ const paintDiscography = (discography, resultsDiv) => {
 
 }
 
-const compareArrays = (oldArray, newArray) => {
 
-    console.log("VIEJO", oldArray);
-    console.log("NUEVO", newArray);
-
-    const addsArray = newArray.filter(elnew => !oldArray.some(elold => elold.id === elnew.id));
-    const delsArray = oldArray.filter(elold => !newArray.some(elnew => elold.id === elnew.id));
-
-    console.log("AÑADIR", addsArray);
-    console.log("QUITAR", delsArray);
-
-    return [addsArray, delsArray];
-}
-
-const newCachedSearch = (API_DATA, resultsDiv, backHistory) => {
-
-    //hacemos una nueva consulta a la API para ver si hay cambios
-    //vamos a simular que hay menos datos empleando una búsqueda que recoja menos datos de la API
-    console.log(backHistory)
-
-
-    const headers = new Headers();
-    // add headers
-    headers.append('User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/');
-    const request = new Request(`${API_DATA.url}/database/search?q=${backHistory.searchText}&token=${API_DATA.token}&type=artist&per_page=5`, {
-        headers: headers
-    });
-    const response = fetch(request)
-        .then(response => response.json())
-        .then(data => {
-            const newDataArtists = data.results;
-
-            const [addsArray, delsArray] = compareArrays(backHistory.resultsArray, newDataArtists);
-
-            console.log("DELS ARRAY", delsArray)
-
-            //quitamos elementos desactualizados
-            delsArray.forEach(el => resultsDiv.querySelector(`#divArtist${el.id}`).remove())
-
-            //añadimos los nuevos elementos
-            //TODO: ME HE QUEDADO POR AQUI. VER COMO HACER QUE ME AÑADA LOS NUEVOS. HAY QUE FORZAR UN NUEVO ELEMENTO
-
-        })
-    console.log("RESPONSE:", response);
-}
 
 
 //------------------------------------MAIN------------------------------------
