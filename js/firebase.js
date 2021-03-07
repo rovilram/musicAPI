@@ -12,7 +12,7 @@ firebase.initializeApp(firebaseConfig);
 
 
 const setFav = (favID, favObject) => {
-    console.log("guardando favorito:", favID, favObject);
+    console.log("guardando favorito:", favID);
     firebase.database().ref(`fav/${favID}`).set(favObject);
 }
 
@@ -22,7 +22,7 @@ const setFav = (favID, favObject) => {
 const getFav = (favID) => {
     //devolvemos una promesa
     return new Promise((resolv, reject) => {
-        firebase.database().ref(`fav/${favID}`).on('value', (data) => {
+        firebase.database().ref(`fav/${favID}`).once('value', (data) => {
             if (data.val() === null) reject("NO HAY DATOS GUARDADOS");
             else resolv(data.val());
         })
@@ -35,7 +35,7 @@ const cleanFav = (favID) => {
 
 const searchFav = (searchText) => {
     return new Promise((resolv, reject) => {
-        firebase.database().ref("fav/").on('value', (data) => {
+        firebase.database().ref("fav/").once('value', (data) => {
             if (data.val() === null) resolv([]);
             else {
                 const allFav = data.val();
