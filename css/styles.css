@@ -100,8 +100,7 @@ h2 {
 .searchBtn,
 .cleanBtn,
 .cacheBtn,
-.backBtn,
-.favBtn {
+.backBtn {
   padding: 10px;
   margin: 10px;
   display: flex;
@@ -115,25 +114,31 @@ h2 {
 .cacheBtn {
   width: 100px;
 }
+.favBtn {
+  color:#ffd700;
+  font-size:2rem;
+  transition: color 0.25s;
 
+}
+.favBtn:hover {
+  color:#ff0009;
+}
 .searchBtn:hover,
 .cleanBtn:hover,
 .backBtn:hover,
 .cacheBtn:hover,
-.backBtn:hover,
-.favBtn:hover {
+.backBtn:hover {
   background-color: #ffd700;
   color: black;
 }
 
 
 .fav {
-  background-color:#ffd700;
-  color: black;
+  color: #ff0009;
 }
 
 .fav:hover {
-  color: white;
+  color: #ffd700;
 }
 
 footer {

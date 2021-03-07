@@ -103,11 +103,11 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
             className: "artistWrapper"
         }, newResultDiv)
         const artistFavBtnWrapper = createNode("div", {
-            className: "artistFavBtnWrapper",
+            className: "artistFavBtnWrapper",   
         }, artistWrapper);
         const favBtn = createNode("Div", {
             className: "favBtn",
-            innerText: "Favorito"
+            innerHTML: '<i class="fas fa-heart"></i>' 
         }, artistFavBtnWrapper);
         //si es favorito marca el botón como favorito
         getFav(`artist${artist.id}`)
@@ -209,7 +209,7 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
 
     const favBtn = createNode("Div", {
         className: "favBtn",
-        innerText: "Favorito"
+        innerText: '<i class="fas fa-heart"></i>'
     }, detailBtnWrapper);
 
     //si es favorito marca el botón como favorito
