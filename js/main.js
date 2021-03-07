@@ -127,23 +127,34 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
 
         //Eventos
         //Botón favoritos
-        favBtn.addEventListener("click", () => {
-
+        favBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const favDiv = favBtn.closest(".artistWrapper");
+            const parentDiv = favDiv.parentNode;
             if (favBtn.classList.contains("fav")) {
+                //showMaster(searchText, newResultDiv, API_DATA);
+                //No hace falta dibujar todo, solo lo cambiamos de sitio.
+                const FavDivsBtn = parentDiv.querySelectorAll(".fav");
+                const lastFavDivsBtn = FavDivsBtn[FavDivsBtn.length - 1]
+                const lastFavDiv = lastFavDivsBtn.closest(".artistWrapper");
+                lastFavDiv.after(favDiv);
                 cleanFav(`artist${artist.id}`);
                 favBtn.classList.remove("fav");
-                showMaster(searchText, newResultDiv, API_DATA);
+
             }
             else {
                 setFav(`artist${artist.id}`, artist);
                 favBtn.classList.add("fav");
-                showMaster(searchText, newResultDiv, API_DATA);
+                //showMaster(searchText, newResultDiv, API_DATA);
+                //No hace falta dibujar todo, solo lo cambiamos de sitio.
+                parentDiv.prepend(favDiv)
             }
+
         })
         artistWrapper.addEventListener("click", () => {
             showDetail(dataArtists, artist.id, API_DATA, newResultDiv, searchText);
         })
-        
+
     })
 }
 
