@@ -16,7 +16,7 @@
 ## TODO:
 * refactorizar
 * refactorizar CSS y aplicar mobile first
-* Hacer caché de repintado (si se actualiza un listado maestro no lo borramos del todo, solo quitamos los elementos que ya no necesitamos en la nueva búsqueda, y ponemos los nuevos)
+~~* Hacer caché de repintado (si se actualiza un listado maestro no lo borramos del todo, solo quitamos los elementos que ya no necesitamos en la nueva búsqueda, y ponemos los nuevos)~~
 * Mejorar función searchFav ya que ahora estamos haciendo el filtrado en frontend, ya que no entiendo como hacer una búsqueda en firebase;
 
 ## REQUISITOS
