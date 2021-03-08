@@ -11,6 +11,7 @@
 * Permite elección de favoritos de bandas en listado maestro y también en listado detalle.
 * Persistencia de datos de favoritos en Firebase (de todo el objeto que permita pintarlo en el listado maestro)
 * Los Favoritos en el listado maestro van a aparecer encima del resto de búsqueda
+* Al pulsar en botón favoritos de vista maestro se hace un "caché de escritura" que no pinta todos los datos de nuevo, sino que elimina de la vista el elemento y lo reubica en el DOM en un sitio u otro en función de si es favorito o no.
 
 ## TODO:
 * refactorizar
