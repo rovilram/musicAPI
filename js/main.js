@@ -103,17 +103,50 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
             className: "artistWrapper"
         }, newResultDiv)
         const artistFavBtnWrapper = createNode("div", {
-            className: "artistFavBtnWrapper",   
+            className: "artistFavBtnWrapper",
         }, artistWrapper);
-        const favBtn = createNode("Div", {
-            className: "favBtn",
-            innerHTML: '<i class="far fa-heart"></i>' 
-        }, artistFavBtnWrapper);
-        //si es favorito marca el botón como favorito
-        getFav(`artist${artist.id}`)
-            .then(id => favBtn.classList.add("fav"))
-            .then(() => favBtn.innerHTML='<i class="fas fa-heart"></i>')
-            .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
+
+
+        if (logged) {
+            const favBtn = createNode("Div", {
+                className: "favBtn",
+                innerHTML: '<i class="fa fa-heart"></i>'
+            }, artistFavBtnWrapper);
+            //si es favorito marca el botón como favorito
+            getFav(`artist${artist.id}`)
+                .then(id => favBtn.classList.add("fav"))
+                .then(() => favBtn.innerHTML = '<i class="fas fa-heart"></i>')
+                .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
+            favBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const favDiv = favBtn.closest(".artistWrapper");
+                const parentDiv = favDiv.parentNode;
+                if (favBtn.classList.contains("fav")) {
+                    //showMaster(searchText, newResultDiv, API_DATA);
+                    //No hace falta dibujar todo, solo lo cambiamos de sitio.
+                    const FavDivsBtn = parentDiv.querySelectorAll(".fav");
+                    const lastFavDivsBtn = FavDivsBtn[FavDivsBtn.length - 1]
+                    const lastFavDiv = lastFavDivsBtn.closest(".artistWrapper");
+                    lastFavDiv.after(favDiv);
+                    cleanFav(`artist${artist.id}`);
+                    favBtn.classList.remove("fav");
+                    favBtn.innerHTML = '<i class="far fa-heart"></i>'
+                }
+                else {
+                    //Esto es para búsqueda en firebase. Lo comento porque no me da la funcionalidad que necesito
+                    //  artist.titleSearch = artist.title.toLowerCase();
+                    setFav(`artist${artist.id}`, artist);
+                    favBtn.classList.add("fav");
+                    //showMaster(searchText, newResultDiv, API_DATA);
+                    //No hace falta dibujar todo, solo lo cambiamos de sitio.
+                    parentDiv.prepend(favDiv)
+                    favBtn.innerHTML = '<i class="fas fa-heart"></i>'
+
+                }
+
+            })
+        }
+
         createNode("div", {
             className: "artistName",
             innerText: artist.title
@@ -128,34 +161,7 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
 
         //Eventos
         //Botón favoritos
-        favBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const favDiv = favBtn.closest(".artistWrapper");
-            const parentDiv = favDiv.parentNode;
-            if (favBtn.classList.contains("fav")) {
-                //showMaster(searchText, newResultDiv, API_DATA);
-                //No hace falta dibujar todo, solo lo cambiamos de sitio.
-                const FavDivsBtn = parentDiv.querySelectorAll(".fav");
-                const lastFavDivsBtn = FavDivsBtn[FavDivsBtn.length - 1]
-                const lastFavDiv = lastFavDivsBtn.closest(".artistWrapper");
-                lastFavDiv.after(favDiv);
-                cleanFav(`artist${artist.id}`);
-                favBtn.classList.remove("fav");
-                favBtn.innerHTML='<i class="far fa-heart"></i>'
 
-
-            }
-            else {
-                setFav(`artist${artist.id}`, artist);
-                favBtn.classList.add("fav");
-                //showMaster(searchText, newResultDiv, API_DATA);
-                //No hace falta dibujar todo, solo lo cambiamos de sitio.
-                parentDiv.prepend(favDiv)
-                favBtn.innerHTML='<i class="fas fa-heart"></i>'
-
-            }
-
-        })
         artistWrapper.addEventListener("click", () => {
             showDetail(dataArtists, artist.id, API_DATA, newResultDiv, searchText);
         })
@@ -212,16 +218,44 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
         innerText: "Regresar"
     }, detailBtnWrapper);
 
-    const favBtn = createNode("Div", {
-        className: "favBtn",
-        innerHTML: '<i class="fas fa-heart"></i>'
-    }, detailBtnWrapper);
+    
+    if (logged)
+    {
+        const favBtn = createNode("Div", {
+            className: "favBtn",
+            innerHTML: '<i class="fas fa-heart"></i>'
+        }, detailBtnWrapper);
+        //si es favorito marca el botón como favorito
+        getFav(`artist${artist.id}`)
+            .then(id => favBtn.classList.add("fav"))
+            .then(() => favBtn.innerHTML = '<i class="fas fa-heart"></i>')
+            .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
+        //EVENTO BOTÓN FAVORITO
+        favBtn.addEventListener("click", () => {
+            if (favBtn.classList.contains("fav")) {
+                cleanFav(`artist${artist.id}`);
+                favBtn.classList.remove("fav");
+                favBtn.innerHTML = '<i class="far fa-heart"></i>';
 
-    //si es favorito marca el botón como favorito
-    getFav(`artist${artist.id}`)
-        .then(id => favBtn.classList.add("fav"))
-        .then(() => favBtn.innerHTML='<i class="fas fa-heart"></i>')
-        .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
+            }
+            else {
+                //selecciono el artista del array artistas
+                //para guardarlo en favoritos para el listado maestro.
+                const myArtist = artists.filter(el => el.id === artist.id)[0];
+                //Esto es para búsqueda en firebase. Lo comento porque no me da la funcionalidad que necesito
+                //myArtist.titleSearch = myArtist.title.toLowerCase();
+                setFav(`artist${artist.id}`, myArtist);
+                favBtn.classList.add("fav");
+                favBtn.innerHTML = '<i class="fas  fa-heart"></i>';
+
+
+            }
+        })
+    }
+
+
+
+
 
     createNode("h2", {
         className: "artistData",
@@ -273,25 +307,7 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
         showMaster(searchText, newResultDiv, API_DATA);
     })
 
-    //EVENTO BOTÓN FAVORITO
-    favBtn.addEventListener("click", () => {
-        if (favBtn.classList.contains("fav")) {
-            cleanFav(`artist${artist.id}`);
-            favBtn.classList.remove("fav");
-            favBtn.innerHTML='<i class="far fa-heart"></i>';
 
-        }
-        else {
-            //selecciono el artista del array artistas
-            //para guardarlo en favoritos para el listado maestro.
-            const myArtist = artists.filter(el => el.id === artist.id)[0];
-            setFav(`artist${artist.id}`, myArtist);
-            favBtn.classList.add("fav");
-            favBtn.innerHTML='<i class="fas  fa-heart"></i>';
-
-
-        }
-    })
 }
 
 
@@ -376,8 +392,77 @@ const paintDiscography = (discography, resultsDiv) => {
 
 //------------------------------------MAIN------------------------------------
 const d = document;
+let logged;
+let resultAuth;
+//al iniciar la aplicación vemos si estamos ya logeados o no
+firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+        logged = true;
+        const btnAuthText = d.createTextNode("Desconectar");
+        d.querySelector(".headBtnAuth").firstChild.remove();
+        d.querySelector(".headBtnAuth").appendChild(btnAuthText);
+    }
+    //si no lo estamos autenticamos
 
-//------------------------------------EVENTS------------------------------------
+    else {
+        logged = false;
+        const btnAuthText = d.createTextNode("Conectar");
+        d.querySelector(".headBtnAuth").firstChild.remove();
+        d.querySelector(".headBtnAuth").appendChild(btnAuthText);
+    }
+
+    //------------------------------------EVENTS------------------------------------
+    d.querySelector(".headBtnAuth").addEventListener("click", () => {
+
+
+        if (logged) {
+            //estamos conectados, entonces nos desconectamos
+            firebase.auth().signOut().then(() => {
+                console.log("DESCONECTADO");
+                logged = false;
+            }).catch((error) => {
+                console.log("ERROR AL DESCONECTAR", error);
+            });
+
+        }
+        else {
+            //estamos desconectados, nos conectamos
+            resultAuth = login();
+            console.log("CONECTADO");
+            console.log(resultAuth);
+        }
+
+        /*     //miramos si estamos ya autenticados
+            firebase.auth().onAuthStateChanged(user => {
+                //si lo estamos nos desconectamos
+        
+                if (user) {
+                    logged = true;
+                    console.log("ESTAS CONECTADO");
+                    console.log(resultAuth);
+                    firebase.auth().signOut().then(() => {
+                        console.log("DESCONECTADO")
+                    }).catch((error) => {
+                        console.log("ERROR AL DESCONECTAR", error);
+                    });
+        
+        
+                }
+                //si no lo estamos autenticamos
+        
+                else {
+                    logged = false;
+                    console.log("NO ESTAS CONECTADO")
+                    resultAuth = login();
+                } */
+
+    })
+
+})
+
+
+
+
 d.querySelector(".searchBtn").addEventListener("click", () => {
     const resultsDiv = d.querySelector(".results");
     const searchText = d.querySelector(".searchInput").value;
