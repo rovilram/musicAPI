@@ -295,27 +295,7 @@ const showDiscography = (id, resultsDiv) => {
 }
 
 
-/* const fetchDisco = (id, resultsDiv) => {
-    const api = new DiscogsAPI;
-    const headers = new Headers();
-    // add headers
-    headers.append(...api.getHeader());
-    const request = new Request(`${api.getURL()}/artists/${id}/releases?token=${api.getToken()}&sort=year`, {
-        headers: headers
-    });
-    fetch(request)
-        //obtenemos la discografía
-        .then(response => {
-            return response.json()
-        })
-        .then(releases => {
-            const discography = releases.releases;
-            setCache(`discos${id}`, discography);
 
-            paintDiscography(discography, resultsDiv);
-        })
-}
- */
 
 const paintDiscography = (discography, resultsDiv) => {
     if (discography) {
