@@ -47,19 +47,24 @@ const paintFavBtn = (artistWrapper, artist) => {
     getFav(`artist${artist.id}`)
         .then(id => favBtn.classList.add("fav"))
         .then(() => favBtn.classList.add("fas"))
-        .then (() => favBtn.classList.remove("far"))
+        .then(() => favBtn.classList.remove("far"))
         .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
     favBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         const favDiv = favBtn.closest(".artistWrapper");
-        const parentDiv = favDiv.parentNode;
+        let parentDiv;
+        if (favDiv) {//Estamos en la vista maestro
+            parentDiv = favDiv.parentNode;
+        }
         if (favBtn.classList.contains("fav")) {
             //showMaster(searchText, newResultDiv, API_DATA);
             //No hace falta dibujar todo, solo lo cambiamos de sitio.
-            const FavDivsBtn = parentDiv.querySelectorAll(".fav");
-            const lastFavDivsBtn = FavDivsBtn[FavDivsBtn.length - 1]
-            const lastFavDiv = lastFavDivsBtn.closest(".artistWrapper");
-            lastFavDiv.after(favDiv);
+            if (favDiv) {
+                const FavDivsBtn = parentDiv.querySelectorAll(".fav");
+                const lastFavDivsBtn = FavDivsBtn[FavDivsBtn.length - 1]
+                const lastFavDiv = lastFavDivsBtn.closest(".artistWrapper");
+                lastFavDiv.after(favDiv);
+            }
             cleanFav(`artist${artist.id}`);
             favBtn.classList.remove("fav");
             favBtn.classList.remove("fas");
@@ -71,11 +76,12 @@ const paintFavBtn = (artistWrapper, artist) => {
             setFav(`artist${artist.id}`, artist);
             favBtn.classList.add("fav");
             favBtn.classList.remove("far"),
-            favBtn.classList.add("fas");
-            //showMaster(searchText, newResultDiv, API_DATA);
-            //No hace falta dibujar todo, solo lo cambiamos de sitio.
-            parentDiv.prepend(favDiv);
-
+                favBtn.classList.add("fas");
+            if (favDiv) {
+                //showMaster(searchText, newResultDiv, API_DATA);
+                //No hace falta dibujar todo, solo lo cambiamos de sitio.
+                parentDiv.prepend(favDiv);
+            }
         }
 
     })
@@ -233,39 +239,43 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
         innerText: "Regresar"
     }, detailBtnWrapper);
 
-    
-    if (logged)
-    {
-        const favBtn = createNode("Div", {
-            className: "favBtn",
-            innerHTML: '<i class="fas fa-heart"></i>'
-        }, detailBtnWrapper);
-        //si es favorito marca el botón como favorito
-        getFav(`artist${artist.id}`)
-            .then(id => favBtn.classList.add("fav"))
-            .then(() => favBtn.innerHTML = '<i class="fas fa-heart"></i>')
-            .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
-        //EVENTO BOTÓN FAVORITO
-        favBtn.addEventListener("click", () => {
-            if (favBtn.classList.contains("fav")) {
-                cleanFav(`artist${artist.id}`);
-                favBtn.classList.remove("fav");
-                favBtn.innerHTML = '<i class="far fa-heart"></i>';
 
-            }
-            else {
-                //selecciono el artista del array artistas
-                //para guardarlo en favoritos para el listado maestro.
-                const myArtist = artists.filter(el => el.id === artist.id)[0];
-                //Esto es para búsqueda en firebase. Lo comento porque no me da la funcionalidad que necesito
-                //myArtist.titleSearch = myArtist.title.toLowerCase();
-                setFav(`artist${artist.id}`, myArtist);
-                favBtn.classList.add("fav");
-                favBtn.innerHTML = '<i class="fas  fa-heart"></i>';
+    if (logged) {
+        //selecciono el artista del array artistas
+        //para guardarlo en favoritos para el listado maestro.
+        const myArtist = artists.filter(el => el.id === artist.id)[0];
+
+        paintFavBtn(detailBtnWrapper, myArtist)
+        /*         const favBtn = createNode("Div", {
+                    className: "favBtn",
+                    innerHTML: '<i class="fas fa-heart"></i>'
+                }, detailBtnWrapper);
+                //si es favorito marca el botón como favorito
+                getFav(`artist${artist.id}`)
+                    .then(id => favBtn.classList.add("fav"))
+                    .then(() => favBtn.innerHTML = '<i class="fas fa-heart"></i>')
+                    .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
+                //EVENTO BOTÓN FAVORITO
+                favBtn.addEventListener("click", () => {
+                    if (favBtn.classList.contains("fav")) {
+                        cleanFav(`artist${artist.id}`);
+                        favBtn.classList.remove("fav");
+                        favBtn.innerHTML = '<i class="far fa-heart"></i>';
+        
+                    }
+                    else {
+                        //selecciono el artista del array artistas
+                        //para guardarlo en favoritos para el listado maestro.
+                        const myArtist = artists.filter(el => el.id === artist.id)[0];
+                        //Esto es para búsqueda en firebase. Lo comento porque no me da la funcionalidad que necesito
+                        //myArtist.titleSearch = myArtist.title.toLowerCase();
+                        setFav(`artist${artist.id}`, myArtist);
+                        favBtn.classList.add("fav");
+                        favBtn.innerHTML = '<i class="fas  fa-heart"></i>';
 
 
-            }
-        })
+    }
+}) */
     }
 
 
