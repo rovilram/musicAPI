@@ -60,7 +60,7 @@ const showMaster = (searchText, resultsDiv, API_DATA) => {
             }
             else {
                 //si no está en caché hacemos el fetch
-                fetchArtists(searchText, API_DATA)
+                fetchArtists(searchText)
                     .then(fetchData => {
                         //quitamos los resultados que están en favoritos
                         fetchData = fetchData.filter(
@@ -75,12 +75,13 @@ const showMaster = (searchText, resultsDiv, API_DATA) => {
 
 }
 
-const fetchArtists = async (searchText, API_DATA) => {
+const fetchArtists = async (searchText) => {
     //RECURSO PARA HACER UN AWAIT DE UN FETCH https://dmitripavlutin.com/javascript-fetch-async-await/
+    const api = new DiscogsAPI;
     const headers = new Headers();
     // add headers
-    headers.append(...API_DATA.header);
-    const request = new Request(`${API_DATA.url}/database/search?q=${searchText}&token=${API_DATA.token}&type=artist&per_page=10`, {
+    headers.append(...api.getHeader());
+    const request = new Request(`${api.getURL()}/database/search?q=${searchText}&token=${api.getToken()}&type=artist&per_page=10`, {
         headers: headers
     });
 
@@ -178,18 +179,19 @@ const showDetail = (artists, id, API_DATA, resultsDiv, searchText) => {
         paintArtist(artists, cache, resultsDiv, API_DATA, searchText);
     }
     else {
-        fetchArtist(id, API_DATA)
+        fetchArtist(id)
             .then(artist =>
                 paintArtist(artists, artist, resultsDiv, API_DATA, searchText)
             )
     }
 }
 
-const fetchArtist = async (id, API_DATA) => {
+const fetchArtist = async (id) => {
+    const api = new DiscogsAPI;
     const headers = new Headers();
     // add headers
-    headers.append(...API_DATA.header);
-    const request = new Request(`${API_DATA.url}artists/${id}?token=${API_DATA.token}`, {
+    headers.append(...api.GetHeader());
+    const request = new Request(`${api.getURL()}artists/${id}?token=${api.getToken}`, {
         headers: headers
     });
     const response = await fetch(request);
@@ -321,17 +323,18 @@ const showDiscography = (id, API_DATA, resultsDiv) => {
         paintDiscography(cache.data, resultsDiv);
     }
     else {
-        fetchDisco(id, API_DATA, resultsDiv);
+        fetchDisco(id, resultsDiv);
     }
 
 }
 
 
-const fetchDisco = (id, API_DATA, resultsDiv) => {
+const fetchDisco = (id, resultsDiv) => {
+    const api = new DiscogsAPI;
     const headers = new Headers();
     // add headers
-    headers.append('User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/');
-    const request = new Request(`${API_DATA.url}/artists/${id}/releases?token=${API_DATA.token}&sort=year`, {
+    headers.append(...api.getHeader);
+    const request = new Request(`${api.getURL()}/artists/${id}/releases?token=${api.getToken()}&sort=year`, {
         headers: headers
     });
     fetch(request)
