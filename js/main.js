@@ -34,6 +34,60 @@ const setCache = (searchText, data) => {
 
 const clearCache = () => localStorage.clear();
 
+
+
+const paintFavBtn = (artistWrapper, artist) => {
+    const artistFavBtnWrapper = createNode("div", {
+        className: "artistFavBtnWrapper",
+    }, artistWrapper);
+    const favBtn = createNode("Div", {
+        className: "favBtn far fa-heart",
+    }, artistFavBtnWrapper);
+    //si es favorito marca el botón como favorito
+    getFav(`artist${artist.id}`)
+        .then(id => favBtn.classList.add("fav"))
+        .then(() => favBtn.classList.add("fas"))
+        .then (() => favBtn.classList.remove("far"))
+        .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
+    favBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const favDiv = favBtn.closest(".artistWrapper");
+        const parentDiv = favDiv.parentNode;
+        if (favBtn.classList.contains("fav")) {
+            //showMaster(searchText, newResultDiv, API_DATA);
+            //No hace falta dibujar todo, solo lo cambiamos de sitio.
+            const FavDivsBtn = parentDiv.querySelectorAll(".fav");
+            const lastFavDivsBtn = FavDivsBtn[FavDivsBtn.length - 1]
+            const lastFavDiv = lastFavDivsBtn.closest(".artistWrapper");
+            lastFavDiv.after(favDiv);
+            cleanFav(`artist${artist.id}`);
+            favBtn.classList.remove("fav");
+            favBtn.classList.remove("fas");
+            favBtn.classList.add("far");
+        }
+        else {
+            //Esto es para búsqueda en firebase. Lo comento porque no me da la funcionalidad que necesito
+            //  artist.titleSearch = artist.title.toLowerCase();
+            setFav(`artist${artist.id}`, artist);
+            favBtn.classList.add("fav");
+            favBtn.classList.remove("far"),
+            favBtn.classList.add("fas");
+            //showMaster(searchText, newResultDiv, API_DATA);
+            //No hace falta dibujar todo, solo lo cambiamos de sitio.
+            parentDiv.prepend(favDiv);
+
+        }
+
+    })
+
+}
+
+
+
+
+
+
+
 const showMaster = (searchText, resultsDiv, API_DATA) => {
 
 
@@ -102,49 +156,10 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
             id: `divArtist${artist.id}`,
             className: "artistWrapper"
         }, newResultDiv)
-        const artistFavBtnWrapper = createNode("div", {
-            className: "artistFavBtnWrapper",
-        }, artistWrapper);
 
 
         if (logged) {
-            const favBtn = createNode("Div", {
-                className: "favBtn",
-                innerHTML: '<i class="fa fa-heart"></i>'
-            }, artistFavBtnWrapper);
-            //si es favorito marca el botón como favorito
-            getFav(`artist${artist.id}`)
-                .then(id => favBtn.classList.add("fav"))
-                .then(() => favBtn.innerHTML = '<i class="fas fa-heart"></i>')
-                .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
-            favBtn.addEventListener("click", (e) => {
-                e.stopPropagation();
-                const favDiv = favBtn.closest(".artistWrapper");
-                const parentDiv = favDiv.parentNode;
-                if (favBtn.classList.contains("fav")) {
-                    //showMaster(searchText, newResultDiv, API_DATA);
-                    //No hace falta dibujar todo, solo lo cambiamos de sitio.
-                    const FavDivsBtn = parentDiv.querySelectorAll(".fav");
-                    const lastFavDivsBtn = FavDivsBtn[FavDivsBtn.length - 1]
-                    const lastFavDiv = lastFavDivsBtn.closest(".artistWrapper");
-                    lastFavDiv.after(favDiv);
-                    cleanFav(`artist${artist.id}`);
-                    favBtn.classList.remove("fav");
-                    favBtn.innerHTML = '<i class="far fa-heart"></i>'
-                }
-                else {
-                    //Esto es para búsqueda en firebase. Lo comento porque no me da la funcionalidad que necesito
-                    //  artist.titleSearch = artist.title.toLowerCase();
-                    setFav(`artist${artist.id}`, artist);
-                    favBtn.classList.add("fav");
-                    //showMaster(searchText, newResultDiv, API_DATA);
-                    //No hace falta dibujar todo, solo lo cambiamos de sitio.
-                    parentDiv.prepend(favDiv)
-                    favBtn.innerHTML = '<i class="fas fa-heart"></i>'
-
-                }
-
-            })
+            paintFavBtn(artistWrapper, artist);
         }
 
         createNode("div", {
