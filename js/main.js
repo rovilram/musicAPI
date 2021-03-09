@@ -1,10 +1,10 @@
 "use strict";
 //------------------------------------FUNCTIONS------------------------------------
-const API_DATA = {
+/* const API_DATA = {
     token: "UTtvCaiWDvNQrjQUXmBqZncsMQzXXMrrsOvlTujQ",
     url: "https://api.discogs.com/",
     header: ['User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/']
-}
+} */
 
 //let backHistory = {};
 
@@ -34,7 +34,7 @@ const setCache = (searchText, data) => {
 
 const clearCache = () => localStorage.clear();
 
-const showMaster = (searchText, resultsDiv, API_DATA) => {
+const showMaster = (searchText, resultsDiv) => {
 
 
 
@@ -56,7 +56,7 @@ const showMaster = (searchText, resultsDiv, API_DATA) => {
                 )
                 //unimos los datos de favoritos y caché
                 artistsData = favData.concat(cacheData);
-                paintArtists(artistsData, resultsDiv, API_DATA, searchText);
+                paintArtists(artistsData, resultsDiv, searchText);
             }
             else {
                 //si no está en caché hacemos el fetch
@@ -68,7 +68,7 @@ const showMaster = (searchText, resultsDiv, API_DATA) => {
                         )
                         //unimos los datos de favoritos y fetch
                         artistsData = favData.concat(fetchData);
-                        paintArtists(artistsData, resultsDiv, API_DATA, searchText);
+                        paintArtists(artistsData, resultsDiv, searchText);
                     })
             }
         })
@@ -91,7 +91,7 @@ const fetchArtists = async (searchText) => {
     return await dataArtists.results;
 }
 
-const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
+const paintArtists = (dataArtists, resultsDiv, searchText) => {
 
     const newResultDiv = createNode("div", {
         className: "results"
@@ -164,24 +164,23 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
         //Botón favoritos
 
         artistWrapper.addEventListener("click", () => {
-            showDetail(dataArtists, artist.id, API_DATA, newResultDiv, searchText);
+            showDetail(dataArtists, artist.id, newResultDiv, searchText);
         })
 
     })
 }
 
-const showDetail = (artists, id, API_DATA, resultsDiv, searchText) => {
+const showDetail = (artists, id, resultsDiv, searchText) => {
 
     const cache = getCache(`artist${id}`);
 
     if (cache !== false) {
-        //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
-        paintArtist(artists, cache, resultsDiv, API_DATA, searchText);
+        paintArtist(artists, cache, resultsDiv, searchText);
     }
     else {
         fetchArtist(id)
             .then(artist =>
-                paintArtist(artists, artist, resultsDiv, API_DATA, searchText)
+                paintArtist(artists, artist, resultsDiv, searchText)
             )
     }
 }
@@ -206,7 +205,7 @@ const fetchArtist = async (id) => {
           }) */
 }
 
-const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
+const paintArtist = (artists, artist, resultsDiv, searchText) => {
     const newResultDiv = createNode("div", {
         className: "results",
     });
@@ -302,11 +301,11 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
         newResultDiv.appendChild(membersDiv);
     }
     resultsDiv.replaceWith(newResultDiv);
-    showDiscography(artist.id, API_DATA, newResultDiv);
+    showDiscography(artist.id, newResultDiv);
 
     //EVENTO BOTÓN REGRESAR
     backBtn.addEventListener("click", () => {
-        showMaster(searchText, newResultDiv, API_DATA);
+        showMaster(searchText, newResultDiv);
     })
 
 
@@ -314,7 +313,7 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
 
 
 
-const showDiscography = (id, API_DATA, resultsDiv) => {
+const showDiscography = (id, resultsDiv) => {
 
 
     const cache = getCache(`discos${id}`);
@@ -470,7 +469,7 @@ d.querySelector(".searchBtn").addEventListener("click", () => {
     const resultsDiv = d.querySelector(".results");
     const searchText = d.querySelector(".searchInput").value;
     d.querySelector(".searchSection").classList.add("masterVersion");
-    showMaster(searchText, resultsDiv, API_DATA)
+    showMaster(searchText, resultsDiv)
 
 })
 d.querySelector(".cleanBtn").addEventListener("click", () => {
