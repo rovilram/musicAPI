@@ -26,28 +26,27 @@ class DiscogsAPI {
             headers: headers
         });
         const response = await fetch(request);
-        const responseJSON = await response.json();
-        return await responseJSON;
+        return await response.json();
     }
 
 
     async fetchArtists(searchText) {
-        const URL=`${this.URL}/database/search?q=${searchText}&token=${this.TOKEN}&type=artist&per_page=10`;
+        const URL = `${this.URL}/database/search?q=${searchText}&token=${this.TOKEN}&type=artist&per_page=10`;
         const dataArtists = await this.apiFetch(URL);
-        return await dataArtists.results;
+        return dataArtists.results;
     }
 
 
     async fetchArtist(id) {
-        const URL=`${this.URL}artists/${id}?token=${this.TOKEN}`;
+        const URL = `${this.URL}artists/${id}?token=${this.TOKEN}`;
         const artist = await this.apiFetch(URL);
-        return await artist;
+        return artist;
     }
 
     async fetchDisco(id) {
-        const URL=`${this.URL}/artists/${id}/releases?token=${this.TOKEN}&sort=year`;
+        const URL = `${this.URL}/artists/${id}/releases?token=${this.TOKEN}&sort=year`;
         const releases = await this.apiFetch(URL);
-        return await releases.releases;
+        return releases.releases;
     }
 
 }

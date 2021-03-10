@@ -72,22 +72,81 @@ function login() {
 
 
 
-const createNodes = (nodesObject) => {
+const createNodes = (nodes) => {
+  const htmlNodes = document.createDocumentFragment();
+  const varNodes = {};
+  nodes.map(node => {
+    console.log(node)
+    let tempNode;
+    if (node.nodeType === "text") {
+      console.log(node, "NODO DE TEXTO")
+      tempNode = document.createTextNode(node.text)
+    }
+    else {
+      tempNode = document.createElement(node.nodeType);
+      htmlNodes.appendChild(tempNode);
+      Object.keys(node).map(key => {
+        if(key === "childNodes") {
+          console.log("CHILD", node.childNodes)
+          const childNode = createNodes(node.childNodes);
+          console.log(childNode);
+          setTimeout(tempNode.appendChild(childNode), 10000);
+        }
+        else if (key !== "nodeType" && key !== "text" && key !== "varName") {
+          tempNode.setAttribute(key, node[key]);
+        }
+      })
 
-console.log(nodesObject);
+
+    }
+    if (node.varName) varNodes[node.varName] = tempNode;
+    return htmlNodes; 
+  })
+
+
 }
+/* 
+const createNode = (htmlElement, htmlAttributes, container) => {
+    
+  const HTMLnode = document.createElement(htmlElement);
+
+  Object.entries(htmlAttributes).forEach(([key, val]) => {
+      HTMLnode[key] = val;
+  })
+  if (container) {
+      container.appendChild(HTMLnode);
+  }
+      return HTMLnode;
+}
+ */
+
+
+
+
 
 
 nodesObject = [
 
   {
     varName: "div1",
-    nodeName: "div",
+    nodeType: "div",
     id: "div1",
     className: "divClass",
     childNodes: [
       {
-        nodeName: "text"  
+        nodeType: "text",
+        text: "texto a adjuntar"
+      }
+    ]
+  },
+  {
+    varName: "div2",
+    nodeType: "p",
+    id: "div2",
+    className: "pClass",
+    childNodes: [
+      {
+        nodeName: "text P"
       }
     ]
   }

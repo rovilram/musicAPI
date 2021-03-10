@@ -197,7 +197,7 @@ const paintArtist = (artists, artist, resultsDiv, searchText) => {
         }, detailBtnWrapper);
         //si es favorito marca el botón como favorito
         getFav(`artist${artist.id}`)
-            .then(id => favBtn.classList.add("fav"))
+            .then(() => favBtn.classList.add("fav"))
             .then(() => favBtn.innerHTML = '<i class="fas fa-heart"></i>')
             .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
         //EVENTO BOTÓN FAVORITO
