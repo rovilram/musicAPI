@@ -9,6 +9,7 @@ const firebaseConfig = {
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
+console.log("FIREBASE", firebase)
 
 
 const setFav = (favID, favObject) => {

@@ -16,5 +16,14 @@ BUGS:
     ✔ * #01 En maestro no acepta click para ir a detalle si pincho en el texto @done(21-03-06 22:28)
     ✔ * #02 Quitar cambio de color en hover de botón favoritos para que no de a engaño @done(21-03-06 22:32)
     * #03 Ver gestión de errores en fetch
+<<<<<<< HEAD
     ✔ #06 IMPORTANT: Múltiples errores en Favoritos @done(21-03-09 19:35)
     #07 REORGANIZAR VARIABLES. logged está como local
+=======
+
+
+
+
+RAMA: classesTest Rama de prueba para ver como podríamos usar una clase para evitar tanto parámetro entre funciones
+TODO: Preguntar a David si esto es válido!!!
+>>>>>>> classesTest

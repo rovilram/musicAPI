@@ -1,10 +1,10 @@
 "use strict";
 //------------------------------------FUNCTIONS------------------------------------
-const API_DATA = {
+/* const API_DATA = {
     token: "UTtvCaiWDvNQrjQUXmBqZncsMQzXXMrrsOvlTujQ",
     url: "https://api.discogs.com/",
     header: ['User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/']
-}
+} */
 
 //let backHistory = {};
 
@@ -89,12 +89,7 @@ const paintFavBtn = (artistWrapper, artist) => {
 }
 
 
-
-
-
-
-
-const showMaster = (searchText, resultsDiv, API_DATA) => {
+const showMaster = (searchText, resultsDiv) => {
 
 
 
@@ -116,41 +111,30 @@ const showMaster = (searchText, resultsDiv, API_DATA) => {
                 )
                 //unimos los datos de favoritos y caché
                 artistsData = favData.concat(cacheData);
-                paintArtists(artistsData, resultsDiv, API_DATA, searchText);
+                paintArtists(artistsData, resultsDiv, searchText);
             }
             else {
                 //si no está en caché hacemos el fetch
-                fetchArtists(searchText, API_DATA)
-                    .then(fetchData => {
+                const api = new DiscogsAPI;
+                api.fetchArtists(searchText)
+                    .then(artistsData => {
+                        //guardamos en caché los datos
+                        setCache(searchText, artistsData);
                         //quitamos los resultados que están en favoritos
-                        fetchData = fetchData.filter(
+                        artistsData = artistsData.filter(
                             fetchD => !favData.some(fav => fav.id === fetchD.id)
                         )
                         //unimos los datos de favoritos y fetch
-                        artistsData = favData.concat(fetchData);
-                        paintArtists(artistsData, resultsDiv, API_DATA, searchText);
+                        artistsData = favData.concat(artistsData);
+                        paintArtists(artistsData, resultsDiv, searchText);
                     })
             }
         })
 
 }
 
-const fetchArtists = async (searchText, API_DATA) => {
-    //RECURSO PARA HACER UN AWAIT DE UN FETCH https://dmitripavlutin.com/javascript-fetch-async-await/
-    const headers = new Headers();
-    // add headers
-    headers.append(...API_DATA.header);
-    const request = new Request(`${API_DATA.url}/database/search?q=${searchText}&token=${API_DATA.token}&type=artist&per_page=10`, {
-        headers: headers
-    });
 
-    const response = await fetch(request);
-    const dataArtists = await response.json();
-    setCache(searchText, dataArtists.results);
-    return await dataArtists.results;
-}
-
-const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
+const paintArtists = (dataArtists, resultsDiv, searchText) => {
 
     const newResultDiv = createNode("div", {
         className: "results"
@@ -184,48 +168,30 @@ const paintArtists = (dataArtists, resultsDiv, API_DATA, searchText) => {
         //Botón favoritos
 
         artistWrapper.addEventListener("click", () => {
-            showDetail(dataArtists, artist.id, API_DATA, newResultDiv, searchText);
+            showDetail(dataArtists, artist.id, newResultDiv, searchText);
         })
 
     })
 }
 
-const showDetail = (artists, id, API_DATA, resultsDiv, searchText) => {
+const showDetail = (artists, id, resultsDiv, searchText) => {
 
     const cache = getCache(`artist${id}`);
 
     if (cache !== false) {
-        //TODO: Necesitamos API_DATA para el evento de click del botón. Ver como desacoplar
-        paintArtist(artists, cache, resultsDiv, API_DATA, searchText);
+        paintArtist(artists, cache, resultsDiv, searchText);
     }
     else {
-        fetchArtist(id, API_DATA)
-            .then(artist =>
-                paintArtist(artists, artist, resultsDiv, API_DATA, searchText)
-            )
+        const api = new DiscogsAPI;
+        api.fetchArtist(id)
+            .then(artist => {
+                setCache(`artist${id}`, artist);
+                paintArtist(artists, artist, resultsDiv, searchText);
+            })
     }
 }
 
-const fetchArtist = async (id, API_DATA) => {
-    const headers = new Headers();
-    // add headers
-    headers.append(...API_DATA.header);
-    const request = new Request(`${API_DATA.url}artists/${id}?token=${API_DATA.token}`, {
-        headers: headers
-    });
-    const response = await fetch(request);
-    const artist = await response.json();
-
-    setCache(`artist${id}`, artist);
-    return await artist;
-    /*       .then(response => response.json())
-          .then(artist => {
-              setCache(`artist${id}`, artist);
-              return artist;
-          }) */
-}
-
-const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
+const paintArtist = (artists, artist, resultsDiv, searchText) => {
     const newResultDiv = createNode("div", {
         className: "results",
     });
@@ -241,11 +207,33 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
 
 
     if (logged) {
-        //selecciono el artista del array artistas
-        //para guardarlo en favoritos para el listado maestro.
-        const myArtist = artists.filter(el => el.id === artist.id)[0];
-
-        paintFavBtn(detailBtnWrapper, myArtist)
+        const favBtn = createNode("Div", {
+            className: "favBtn",
+            innerHTML: '<i class="fas fa-heart"></i>'
+        }, detailBtnWrapper);
+        //si es favorito marca el botón como favorito
+        getFav(`artist${artist.id}`)
+            .then(() => favBtn.classList.add("fav"))
+            .then(() => favBtn.innerHTML = '<i class="fas fa-heart"></i>')
+            .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
+        //EVENTO BOTÓN FAVORITO
+        favBtn.addEventListener("click", () => {
+            if (favBtn.classList.contains("fav")) {
+                cleanFav(`artist${artist.id}`);
+                favBtn.classList.remove("fav");
+                favBtn.innerHTML = '<i class="far fa-heart"></i>';
+            }
+            else {
+                //selecciono el artista del array artistas
+                //para guardarlo en favoritos para el listado maestro.
+                const myArtist = artists.filter(el => el.id === artist.id)[0];
+                //Esto es para búsqueda en firebase. Lo comento porque no me da la funcionalidad que necesito
+                //myArtist.titleSearch = myArtist.title.toLowerCase();
+                setFav(`artist${artist.id}`, myArtist);
+                favBtn.classList.add("fav");
+                favBtn.innerHTML = '<i class="fas  fa-heart"></i>';
+            }
+        })
     }
 
     createNode("h2", {
@@ -291,11 +279,11 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
         newResultDiv.appendChild(membersDiv);
     }
     resultsDiv.replaceWith(newResultDiv);
-    showDiscography(artist.id, API_DATA, newResultDiv);
+    showDiscography(artist.id, newResultDiv);
 
     //EVENTO BOTÓN REGRESAR
     backBtn.addEventListener("click", () => {
-        showMaster(searchText, newResultDiv, API_DATA);
+        showMaster(searchText, newResultDiv);
     })
 
 
@@ -303,7 +291,7 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
 
 
 
-const showDiscography = (id, API_DATA, resultsDiv) => {
+const showDiscography = (id, resultsDiv) => {
 
 
     const cache = getCache(`discos${id}`);
@@ -312,31 +300,17 @@ const showDiscography = (id, API_DATA, resultsDiv) => {
         paintDiscography(cache.data, resultsDiv);
     }
     else {
-        fetchDisco(id, API_DATA, resultsDiv);
+        const api = new DiscogsAPI;
+        api.fetchDisco(id)
+        .then(discography => {
+            setCache(`discos${id}`, discography);
+            paintDiscography(discography, resultsDiv);
+        })
     }
 
 }
 
 
-const fetchDisco = (id, API_DATA, resultsDiv) => {
-    const headers = new Headers();
-    // add headers
-    headers.append('User-Agent', 'musicAPIs v0.1 https://rovilram.github.io/musicAPI/');
-    const request = new Request(`${API_DATA.url}/artists/${id}/releases?token=${API_DATA.token}&sort=year`, {
-        headers: headers
-    });
-    fetch(request)
-        //obtenemos la discografía
-        .then(response => {
-            return response.json()
-        })
-        .then(releases => {
-            const discography = releases.releases;
-            setCache(`discos${id}`, discography);
-
-            paintDiscography(discography, resultsDiv);
-        })
-}
 
 
 const paintDiscography = (discography, resultsDiv) => {
@@ -435,7 +409,7 @@ d.querySelector(".searchBtn").addEventListener("click", () => {
     const resultsDiv = d.querySelector(".results");
     const searchText = d.querySelector(".searchInput").value;
     d.querySelector(".searchSection").classList.add("masterVersion");
-    showMaster(searchText, resultsDiv, API_DATA)
+    showMaster(searchText, resultsDiv)
 
 })
 d.querySelector(".cleanBtn").addEventListener("click", () => {
