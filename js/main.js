@@ -246,41 +246,7 @@ const paintArtist = (artists, artist, resultsDiv, API_DATA, searchText) => {
         const myArtist = artists.filter(el => el.id === artist.id)[0];
 
         paintFavBtn(detailBtnWrapper, myArtist)
-        /*         const favBtn = createNode("Div", {
-                    className: "favBtn",
-                    innerHTML: '<i class="fas fa-heart"></i>'
-                }, detailBtnWrapper);
-                //si es favorito marca el botón como favorito
-                getFav(`artist${artist.id}`)
-                    .then(id => favBtn.classList.add("fav"))
-                    .then(() => favBtn.innerHTML = '<i class="fas fa-heart"></i>')
-                    .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
-                //EVENTO BOTÓN FAVORITO
-                favBtn.addEventListener("click", () => {
-                    if (favBtn.classList.contains("fav")) {
-                        cleanFav(`artist${artist.id}`);
-                        favBtn.classList.remove("fav");
-                        favBtn.innerHTML = '<i class="far fa-heart"></i>';
-        
-                    }
-                    else {
-                        //selecciono el artista del array artistas
-                        //para guardarlo en favoritos para el listado maestro.
-                        const myArtist = artists.filter(el => el.id === artist.id)[0];
-                        //Esto es para búsqueda en firebase. Lo comento porque no me da la funcionalidad que necesito
-                        //myArtist.titleSearch = myArtist.title.toLowerCase();
-                        setFav(`artist${artist.id}`, myArtist);
-                        favBtn.classList.add("fav");
-                        favBtn.innerHTML = '<i class="fas  fa-heart"></i>';
-
-
     }
-}) */
-    }
-
-
-
-
 
     createNode("h2", {
         className: "artistData",
@@ -457,29 +423,6 @@ firebase.auth().onAuthStateChanged(user => {
             console.log(resultAuth);
         }
 
-        /*     //miramos si estamos ya autenticados
-            firebase.auth().onAuthStateChanged(user => {
-                //si lo estamos nos desconectamos
-        
-                if (user) {
-                    logged = true;
-                    console.log("ESTAS CONECTADO");
-                    console.log(resultAuth);
-                    firebase.auth().signOut().then(() => {
-                        console.log("DESCONECTADO")
-                    }).catch((error) => {
-                        console.log("ERROR AL DESCONECTAR", error);
-                    });
-        
-        
-                }
-                //si no lo estamos autenticamos
-        
-                else {
-                    logged = false;
-                    console.log("NO ESTAS CONECTADO")
-                    resultAuth = login();
-                } */
 
     })
 
