@@ -34,62 +34,68 @@ const cleanFav = (favID) => {
     firebase.database().ref(`fav/${favID}`).set(null);
 }
 
-const searchFav = (searchText) => {
+const getAllFav = () => {
     return new Promise((resolv, reject) => {
         //como no consigo hacer la búsqueda que yo quiero directamente en Firebase (ver función searchFav2)
         //recojo todos los favoritos y hago el filtrado directamente yo
         firebase.database().ref("fav/").once('value', (data) => {
             if (data.val() === null) resolv([]);
-            else {
-                const allFav = data.val();
-                const favData = Object.keys(allFav).map(key => allFav[key]);
-                const favFilter = favData.filter(el => el.title.toLowerCase().includes(searchText))
-                resolv(favFilter);
-            }
+            else
+                resolv(data.val());
         })
     })
 }
 
+
+const searchFav = async (searchText) => {
+
+    const allFav = await getAllFav();
+    const favData = Object.keys(allFav).map(key => allFav[key]);
+    const favFilter = favData.filter(el => el.title.toLowerCase().includes(searchText))
+    return favFilter;
+}
+
+
 function login() {
     provider = new firebase.auth.GoogleAuthProvider();
     auth = firebase.auth();
-  
+
     // Controlar el acceso a la parte privada
     auth.signInWithPopup(provider)
-      .then((result) => {
-        let credential = result.credential;
-  
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        let token = credential.accessToken;
-  
-        // The signed-in user info.
-        let user = result.user;
-  
-        logged = true;
-  
-        console.log("CONECTADO!!")
-        console.log(result)
-        return result;
+        .then((result) => {
+            let credential = result.credential;
 
-      })
-      .catch((error) => {
-        // Handle Errors here.
-        let errorCode = error.code;
-        let errorMessage = error.message;
-        // The email of the user's account used.
-        let email = error.email;
-        // The firebase.auth.AuthCredential type that was used.
-        let credential = error.credential;
-        // ...
+            // This gives you a Google Access Token. You can use it to access the Google API.
+            let token = credential.accessToken;
 
-        console.log(error.message);
-      });
-  }
+            // The signed-in user info.
+            let user = result.user;
+
+            logged = true;
+
+            console.log("CONECTADO!!")
+            console.log(result)
+            return result;
+
+        })
+        .catch((error) => {
+            // Handle Errors here.
+            let errorCode = error.code;
+            let errorMessage = error.message;
+            // The email of the user's account used.
+            let email = error.email;
+            // The firebase.auth.AuthCredential type that was used.
+            let credential = error.credential;
+            // ...
+
+            console.log(error.message);
+        });
+}
 
 
 //No se puede hacer una búsqueda en el texto completo con firebase directamente, solo podemos hacer una búsqueda que empiece con un determinado texto (no que lo tenga entre medias).
 //Para hacer eso deberíamos usar un servicio externo a firebase que se llama "Algoria".
-/* 
+/*
 const searchFav2 = (searchText) => {
     return new Promise((resolv, reject) => {
         //encontré la forma de hacer la búsqueda parcial en este recurso
