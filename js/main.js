@@ -42,7 +42,7 @@ const paintFavBtn = (artistWrapper, artist) => {
             favBtn.classList.add("fav", "fas");
             favBtn.classList.remove("far");
         })
-        
+
         .catch(err => null); //no quiero tratar el error y no quiero que salga en consola
     favBtn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -362,14 +362,16 @@ firebase.auth().onAuthStateChanged(user => {
         headBtnAuth.appendChild(btnAuthText);
         //pintamos el botón favorito del header
         const headFavBtn = createNode("div", {
-            className: "favBtn fas fa-heart"
+            className: "favBtn fas fa-heart",
+            id: "headFavBtn"
         })
-        headBtnAuth.parentNode.appendChild(headFavBtn);
+        headBtnAuth.parentNode.prepend(headFavBtn);
         headFavBtn.addEventListener("click", () => {
             const resultsDiv = d.querySelector(".results");
             getAllFav()
                 .then((data) => Object.keys(data).map(key => data[key]))
                 .then(dataArtists => paintArtists(dataArtists, resultsDiv))
+                .then(d.querySelector(".searchSection").classList.add("masterVersion"))
         })
     }
 
@@ -380,6 +382,7 @@ firebase.auth().onAuthStateChanged(user => {
         const btnAuthText = d.createTextNode("Conectar");
         d.querySelector(".headBtnAuth").firstChild.remove();
         d.querySelector(".headBtnAuth").appendChild(btnAuthText);
+        d.querySelector("#headFavBtn").remove();
     }
 })
 
