@@ -356,10 +356,15 @@ let resultAuth;
 firebase.auth().onAuthStateChanged(user => {
     if (user) {
         logged = true;
-        const btnAuthText = d.createTextNode("Desconectar");
+        //const btnAuthText = d.createTextNode("Desconectar");
+        const picBtnAuth = createNode("img", {
+            className: "picBtnAuth",
+            src: user.photoURL
+        })
         const headBtnAuth = d.querySelector(".headBtnAuth");
+        headBtnAuth.classList.add("connected")
         headBtnAuth.firstChild.remove();
-        headBtnAuth.appendChild(btnAuthText);
+        headBtnAuth.appendChild(picBtnAuth);
         //pintamos el botón favorito del header
         const headFavBtn = createNode("div", {
             className: "favBtn fas fa-heart",
@@ -382,6 +387,7 @@ firebase.auth().onAuthStateChanged(user => {
         const btnAuthText = d.createTextNode("Conectar");
         d.querySelector(".headBtnAuth").firstChild.remove();
         d.querySelector(".headBtnAuth").appendChild(btnAuthText);
+        d.querySelector(".headBtnAuth").classList.remove("connected")
         d.querySelector("#headFavBtn").remove();
     }
 })
@@ -402,9 +408,11 @@ d.querySelector(".headBtnAuth").addEventListener("click", () => {
     }
     else {
         //estamos desconectados, nos conectamos
-        resultAuth = login();
-        console.log("CONECTADO");
-        console.log(resultAuth);
+        login()
+            .then(auth=> {
+                console.log("AUTENTIFICACION", auth);
+                resultAuth = auth;
+            });
     }
 
 

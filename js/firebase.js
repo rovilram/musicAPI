@@ -56,40 +56,42 @@ const searchFav = async (searchText) => {
 }
 
 
-function login() {
-    provider = new firebase.auth.GoogleAuthProvider();
-    auth = firebase.auth();
+ async function login() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const auth = firebase.auth();
+
+        await auth.signInWithPopup(provider)
+            .then((result) => {
+                const credential = result.credential;
+
+                // This gives you a Google Access Token. You can use it to access the Google API.
+                const token = credential.accessToken;
+
+                // The signed-in user info.
+                const user = result.user;
+
+                logged = true;
+
+                console.log("CONECTADO!!")
+                console.log(result)
+                return result;
+
+            })
+            .catch((error) => {
+                // Handle Errors here.
+                let errorCode = error.code;
+                let errorMessage = error.message;
+                // The email of the user's account used.
+                let email = error.email;
+                // The firebase.auth.AuthCredential type that was used.
+                let credential = error.credential;
+                // ...
+
+                console.log(error.message);
+                reject(error.message)
+            });
 
     // Controlar el acceso a la parte privada
-    auth.signInWithPopup(provider)
-        .then((result) => {
-            let credential = result.credential;
-
-            // This gives you a Google Access Token. You can use it to access the Google API.
-            let token = credential.accessToken;
-
-            // The signed-in user info.
-            let user = result.user;
-
-            logged = true;
-
-            console.log("CONECTADO!!")
-            console.log(result)
-            return result;
-
-        })
-        .catch((error) => {
-            // Handle Errors here.
-            let errorCode = error.code;
-            let errorMessage = error.message;
-            // The email of the user's account used.
-            let email = error.email;
-            // The firebase.auth.AuthCredential type that was used.
-            let credential = error.credential;
-            // ...
-
-            console.log(error.message);
-        });
 }
 
 

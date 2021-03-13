@@ -82,11 +82,17 @@ body {
   background-color: #ff0009;
   color: white;
   min-width: 25vw;
+  transition: background-color 0.5s, color 0.5s;
 }
 
-/* .headBtnAuth {
-  width:100px;
-} */
+.headBtnAuth.connected {
+  padding:0;
+  min-width: 0;
+  border-radius: 50%;
+  transition: color 0.5s, background-color 0.5s;
+}
+
+
 .headBtnAuth:hover,
 .searchBtn:hover,
 .cleanBtn:hover,
@@ -121,10 +127,24 @@ body {
   background-color: #ff0009;
   color:white;
   border-radius: 50%;
-  padding: 10px;
+  padding: 14px;
+  transition: color 0.5s, background-color 0.5s;
 }
 #headFavBtn:hover {
-  color:#ffd700
+  background-color:#ffd700;
+  color:#ff0009
+}
+
+.picBtnAuth {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border:5px solid #ff0009;
+  transition: border-color 0.5s;
+}
+.picBtnAuth:hover {
+ border-color: #ffd700;
+
 }
 
 .headBtnWrapper {
